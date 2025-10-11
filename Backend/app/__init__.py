@@ -15,6 +15,6 @@ def create_app():
 
     @app.route('/')
     def home():
-        return jsonify({"message" :"Welcome les gars"})
+        return jsonify({"message" :"Welcome les gars creer ta propre branche pour mettre le code apres merci"})
 
     return app

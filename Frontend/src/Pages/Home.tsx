@@ -11,7 +11,7 @@ const Home = () => {
   }, []);
 
   return (
-    <div>
+    <div className='container'>
       <h1>Page d'accueil</h1>
       <p>Message depuis Flask: {message}</p>
     </div>

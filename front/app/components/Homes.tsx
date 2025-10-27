@@ -97,19 +97,19 @@ const Home = () => {
                             </p>
                         </div>
                         <div className="bg-white bg-opacity-10 p-6 rounded-lg backdrop-blur-sm">
-                            <div className="text-2xl font-bold text-indigo-200 mb-2">2</div>
-                            <h3 className="font-bold text-lg mb-2">Modélisation</h3>
-                            <p className="text-sm opacity-0.1">Implémentation et entraînement de plusieurs modèles de machine learning.</p>
+                            <div className="text-2xl font-bold text-indigo-600 mb-2">2</div>
+                            <h3 className="font-bold text-lg text-gray-800 mb-2">Modélisation</h3>
+                            <p className="text-sm text-gray-800 ">Implémentation et entraînement de plusieurs modèles de machine learning.</p>
                         </div>
                         <div className="bg-white bg-opacity-10 p-6 rounded-lg backdrop-blur-sm">
-                            <div className="text-2xl font-bold text-indigo-200 mb-2">3</div>
+                            <div className="text-2xl font-bold text-indigo-600 mb-2">3</div>
                             <h3 className="font-bold text-lg mb-2">Évaluation</h3>
-                            <p className="text-sm opacity-90">Analyse des performances via matrice de confusion, accuracy, précision et rappel.</p>
+                            <p className="text-sm text-gray-800 ">Analyse des performances via matrice de confusion, accuracy, précision et rappel.</p>
                         </div>
                         <div className="bg-white bg-opacity-10 p-6 rounded-lg backdrop-blur-sm">
-                            <div className="text-2xl font-bold text-indigo-200 mb-2">4</div>
-                            <h3 className="font-bold text-lg mb-2">Déploiement</h3>
-                            <p className="text-sm opacity-90">Intégration du meilleur modèle dans une application web accessible.</p>
+                            <div className="text-2xl font-bold text-indigo-600 mb-2">4</div>
+                            <h3 className="font-bold text-lg text-gray-800 mb-2">Déploiement</h3>
+                            <p className="text-sm text-gray-800 ">Intégration du meilleur modèle dans une application web accessible.</p>
                         </div>
                     </div>
                 </div>
@@ -174,8 +174,8 @@ const Home = () => {
                             <h4 className="font-bold text-lg mb-4">Contact</h4>
                             <ul className="space-y-2 text-gray-400">
                                 <li>contact@frauddetect-ai.com</li>
-                                <li>+33 1 23 45 67 89</li>
-                                <li>Paris, France</li>
+                                <li>+221 78 145 49 10</li>
+                                <li>Dakar, Senegal</li>
                             </ul>
                         </div>
                     </div>
@@ -189,3 +189,4 @@ const Home = () => {
 }
 
 export default Home;
+

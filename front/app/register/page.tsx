@@ -9,8 +9,6 @@ const Page = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    company: '',
-    phone: '',
     acceptTerms: false
   });
 

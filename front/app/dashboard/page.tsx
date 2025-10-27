@@ -1,11 +1,25 @@
 "use client";
 
 import React, { useState } from 'react';
+import TransactionnelModal from '../components/TransactionModal';
+import AlertsModal from './AlertsModal';
+import ModelsModal from './ModelsModal';
+import ConfusionMatrices from '../components/ConfusionMatrices';
+import DataDistribution from '../components/DataDistribution';
+import AnalyticsModal from '../components/AnalyticsModal';
+import NormalisationStatsModal from '../components/NormalisationStats';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
+   
+  const [isTransactionsModalOpen, setIsTransactionsModalOpen] = useState(false); 
+  const [isAlertsModalOpen, setIsAlertsModalOpen] = useState(false);
+  const [isModelsModalOpen, setIsModelsModalOpen] = useState(false);
+  const [isConfusionMatricesOpen, setIsConfusionMatricesOpen] = useState(false); // Ajoutez cet état
+  const [isDataDistributionOpen, setIsDataDistributionOpen] = useState(false);
+  const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
+  const [isNormalisationStatsOpen, setIsNormalisationStatsOpen] = useState(false);
   // Données simulées
   const statsData = {
     totalTransactions: 12543,
@@ -16,10 +30,10 @@ const Dashboard = () => {
   };
 
   const recentAlerts = [
-    { id: 1, transaction: 'TRX-7845', amount: '€2,450.00', status: 'Fraude suspectée', time: '2 min', priority: 'high', user: 'Jean D.' },
-    { id: 2, transaction: 'TRX-7844', amount: '€150.00', status: 'Analyse en cours', time: '5 min', priority: 'medium', user: 'Marie L.' },
-    { id: 3, transaction: 'TRX-7842', amount: '€890.00', status: 'Approuvé', time: '10 min', priority: 'low', user: 'Pierre M.' },
-    { id: 4, transaction: 'TRX-7840', amount: '€1,250.00', status: 'Fraude confirmée', time: '15 min', priority: 'high', user: 'Sophie T.' }
+    { id: 1, transaction: 'TRX-7845', amount: '€2,450.00', status: 'Fraude suspectée', time: '2 min', priority: 'high' as const, user: 'Jean D.' },
+    { id: 2, transaction: 'TRX-7844', amount: '€150.00', status: 'Analyse en cours', time: '5 min', priority: 'medium' as const, user: 'Marie L.' },
+    { id: 3, transaction: 'TRX-7842', amount: '€890.00', status: 'Approuvé', time: '10 min', priority: 'low' as const, user: 'Pierre M.' },
+    { id: 4, transaction: 'TRX-7840', amount: '€1,250.00', status: 'Fraude confirmée', time: '15 min', priority: 'high' as const, user: 'Sophie T.' }
   ];
 
   const modelPerformance = [
@@ -28,6 +42,13 @@ const Dashboard = () => {
     { metric: 'Recall', value: 92.8, target: 91.0, color: 'bg-gradient-to-r from-purple-400 to-indigo-500' },
     { metric: 'F1-Score', value: 94.0, target: 92.5, color: 'bg-gradient-to-r from-orange-400 to-red-500' }
   ];
+
+  // Gestionnaire d'actions pour les alertes
+  const handleAlertAction = (alertId: number, action: string) => {
+    console.log(`Action "${action}" sur l'alerte ${alertId}`);
+    // Ici vous pouvez ajouter la logique pour traiter l'alerte
+    // Par exemple, appeler une API, mettre à jour l'état, etc.
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 flex">
@@ -53,17 +74,68 @@ const Dashboard = () => {
         {/* Navigation */}
         <nav className="flex-1 mt-8 px-4">
           {[
-            { id: 'overview', name: 'Tableau de Bord', icon: '📊', badge: null },
-            { id: 'transactions', name: 'Transactions', icon: '💳', badge: '12' },
-            { id: 'alerts', name: 'Alertes', icon: '🚨', badge: '3' },
-            { id: 'analytics', name: 'Analytiques', icon: '📈', badge: null },
-            { id: 'models', name: 'Modèles IA', icon: '🤖', badge: 'New' },
-            { id: 'reports', name: 'Rapports', icon: '📋', badge: null },
+           
+            { 
+              id: 'normalisation',  
+              name: 'Normalisation', 
+              icon: '⚖️', 
+              badge: 'New',
+              onClick: () => setIsNormalisationStatsOpen(true)
+            },
+            { 
+              id: 'transactions', 
+              name: 'Transactions', 
+              icon: '💳', 
+              badge: '12',
+              onClick: () => setIsTransactionsModalOpen(true)
+            },
+            { 
+              id: 'alerts', 
+              name: 'Valeurs', 
+              icon: '🚨', 
+              badge: '3',
+              onClick: () => setIsAlertsModalOpen(true)
+            },
+            { 
+              id: 'analytics', 
+              name: 'Valeurs Aberantes', 
+              icon: '📈', 
+              badge: null,
+              onClick: () => setIsAnalyticsModalOpen(true) 
+            },
+            
+            { 
+              id: 'models', 
+              name: 'Modèles IA', 
+              icon: '🤖', 
+              badge: 'New',
+              onClick: () => setIsModelsModalOpen(true)
+            },
+            { 
+              id: 'confusion-matrices', 
+              name: 'Matrices Confusion', 
+              icon: '📊', 
+              badge: 'New',
+              onClick: () => setIsConfusionMatricesOpen(true)
+            },
+            {
+            id: 'data-distribution', 
+            name: 'Distribution Données', 
+            icon: '📈', 
+            badge: 'New',
+            onClick: () => setIsDataDistributionOpen(true)
+          },
+          { id: 'reports', name: 'Rapports', icon: '📋', badge: null },
             { id: 'settings', name: 'Paramètres', icon: '⚙️', badge: null }
           ].map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => {
+                setActiveTab(item.id);
+                if (item.onClick) {
+                  item.onClick();
+                }
+              }}
               className={`group relative w-full flex items-center justify-between px-4 py-3 rounded-2xl mb-2 transition-all duration-300 ${
                 activeTab === item.id 
                   ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg shadow-indigo-500/25' 
@@ -96,7 +168,7 @@ const Dashboard = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-slate-900 truncate">Admin User</p>
-                <p className="text-sm text-slate-500 truncate">admin@fraudshield.com</p>
+                <p className="text-sm text-slate-500 truncate">adminfraude@gmail.com</p>
               </div>
               <button className="p-2 hover:bg-white rounded-xl transition-colors duration-200">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -155,133 +227,11 @@ const Dashboard = () => {
         {/* Main Dashboard Content */}
         <main className="flex-1 p-8 overflow-auto">
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {[
-              { 
-                title: 'Transactions', 
-                value: statsData.totalTransactions.toLocaleString(), 
-                change: '+12%', 
-                trend: 'up',
-                icon: '💳',
-                gradient: 'from-blue-500 to-cyan-500',
-                bg: 'bg-gradient-to-br from-blue-50 to-cyan-50'
-              },
-              { 
-                title: 'Fraudes Détectées', 
-                value: statsData.fraudDetected, 
-                change: '+3%', 
-                trend: 'up',
-                icon: '🚨',
-                gradient: 'from-red-500 to-pink-500',
-                bg: 'bg-gradient-to-br from-red-50 to-pink-50'
-              },
-              { 
-                title: 'Taux de Précision', 
-                value: `${statsData.accuracyRate}%`, 
-                change: '+1.2%', 
-                trend: 'up',
-                icon: '🎯',
-                gradient: 'from-green-500 to-emerald-500',
-                bg: 'bg-gradient-to-br from-green-50 to-emerald-50'
-              },
-              { 
-                title: 'Économies', 
-                value: `€${(statsData.savings / 1000).toFixed(0)}K`, 
-                change: '+8%', 
-                trend: 'up',
-                icon: '💰',
-                gradient: 'from-purple-500 to-indigo-500',
-                bg: 'bg-gradient-to-br from-purple-50 to-indigo-50'
-              }
-            ].map((stat, index) => (
-              <div key={index} className={`${stat.bg} rounded-3xl p-6 border border-slate-200/60 shadow-lg shadow-slate-500/10 backdrop-blur-sm`}>
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`w-14 h-14 bg-gradient-to-br ${stat.gradient} rounded-2xl flex items-center justify-center shadow-lg`}>
-                    <span className="text-2xl">{stat.icon}</span>
-                  </div>
-                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                    stat.trend === 'up' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
-                  }`}>
-                    {stat.change}
-                  </span>
-                </div>
-                <h3 className="text-3xl font-bold text-slate-900 mb-2">{stat.value}</h3>
-                <p className="text-slate-600 font-medium">{stat.title}</p>
-              </div>
-            ))}
-          </div>
-
           {/* Charts and Alerts Section */}
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
             {/* Performance Metrics */}
-            <div className="xl:col-span-2 bg-white rounded-3xl p-8 border border-slate-200/60 shadow-lg shadow-slate-500/10">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold text-slate-900">Performance du Modèle IA</h2>
-                <button className="px-4 py-2 bg-slate-50 hover:bg-slate-100 rounded-xl text-slate-600 font-medium transition-colors duration-200">
-                  Voir détails
-                </button>
-              </div>
-              <div className="space-y-6">
-                {modelPerformance.map((metric, index) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4 flex-1">
-                      <div className={`w-3 h-12 ${metric.color} rounded-full shadow-lg`}></div>
-                      <div>
-                        <p className="font-semibold text-slate-900">{metric.metric}</p>
-                        <p className="text-sm text-slate-500">Cible: {metric.target}%</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <div className="w-32 bg-slate-100 rounded-full h-3 shadow-inner">
-                        <div 
-                          className={`h-3 rounded-full ${metric.color} shadow-lg`} 
-                          style={{ width: `${metric.value}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-xl font-bold text-slate-900 w-16">{metric.value}%</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
 
             {/* Recent Alerts */}
-            <div className="bg-white rounded-3xl p-8 border border-slate-200/60 shadow-lg shadow-slate-500/10">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold text-slate-900">Alertes Récentes</h2>
-                <span className="text-indigo-600 font-semibold cursor-pointer hover:text-indigo-700">Tout voir</span>
-              </div>
-              <div className="space-y-4">
-                {recentAlerts.map((alert) => (
-                  <div key={alert.id} className="group p-4 bg-slate-50 hover:bg-white rounded-2xl border border-slate-200/60 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-300 cursor-pointer">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-3 h-3 rounded-full ${
-                          alert.priority === 'high' ? 'bg-red-500' :
-                          alert.priority === 'medium' ? 'bg-orange-500' :
-                          'bg-green-500'
-                        }`}></div>
-                        <span className="font-semibold text-slate-900">{alert.transaction}</span>
-                      </div>
-                      <span className="text-slate-500 text-sm">{alert.time}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-slate-600">{alert.user}</p>
-                        <p className="text-lg font-bold text-slate-900">{alert.amount}</p>
-                      </div>
-                      <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                        alert.priority === 'high' ? 'bg-red-100 text-red-600' :
-                        alert.priority === 'medium' ? 'bg-orange-100 text-orange-600' :
-                        'bg-green-100 text-green-600'
-                      }`}>
-                        {alert.status}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* Quick Actions */}
@@ -291,10 +241,21 @@ const Dashboard = () => {
               {[
                 { icon: '📊', title: 'Nouveau Rapport', desc: 'Générer un rapport détaillé' },
                 { icon: '🤖', title: 'Entraîner Modèle', desc: 'Optimiser les performances' },
-                { icon: '📋', title: 'Audit Sécurité', desc: 'Vérifier la conformité' },
-                { icon: '⚙️', title: 'Paramètres', desc: 'Configurer le système' }
+                { icon: '📋', title: 'Matrices Confusion', desc: 'Analyser les performances' },
+                { icon: '⚙️', title: 'Paramètres', desc: 'Configurer le système' },
+                { icon: '📊', title: 'Distribution Données', desc: 'Analyser le déséquilibre des classes' }
               ].map((action, index) => (
-                <button key={index} className="group p-6 bg-slate-50 hover:bg-gradient-to-br hover:from-indigo-50 hover:to-purple-50 rounded-2xl border border-slate-200/60 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-300 text-left">
+                <button 
+                  key={index} 
+                  className="group p-6 bg-slate-50 hover:bg-gradient-to-br hover:from-indigo-50 hover:to-purple-50 rounded-2xl border border-slate-200/60 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-300 text-left"
+                  onClick={() => {
+                    if (action.title === 'Entraîner Modèle') {
+                      setIsModelsModalOpen(true);
+                    } else if (action.title === 'Matrices Confusion') {
+                      setIsConfusionMatricesOpen(true);
+                    }
+                  }}
+                >
                   <div className="w-14 h-14 bg-white group-hover:bg-indigo-500 rounded-2xl flex items-center justify-center mb-4 shadow-lg group-hover:shadow-indigo-500/25 transition-all duration-300">
                     <span className="text-2xl group-hover:scale-110 transition-transform duration-300">{action.icon}</span>
                   </div>
@@ -314,6 +275,51 @@ const Dashboard = () => {
           onClick={() => setSidebarOpen(false)}
         ></div>
       )}
+
+      {/* Modal des Transactions */}
+      <TransactionnelModal 
+        open={isTransactionsModalOpen}
+        onClose={() => setIsTransactionsModalOpen(false)}
+        onSave={(transactionData) => {
+          console.log('Transaction sauvegardée:', transactionData);
+          setIsTransactionsModalOpen(false);
+        }}
+      />
+
+      {/* Modal des Alertes */}
+      <AlertsModal 
+        open={isAlertsModalOpen}
+        onClose={() => setIsAlertsModalOpen(false)}
+        alerts={recentAlerts}
+        onAlertAction={handleAlertAction}
+      />
+
+      {/* Modal des Modèles IA */}
+      <ModelsModal 
+        open={isModelsModalOpen}
+        onClose={() => setIsModelsModalOpen(false)}
+      />
+
+      {/* Modal des Matrices de Confusion */}
+      <ConfusionMatrices 
+        open={isConfusionMatricesOpen}
+        onClose={() => setIsConfusionMatricesOpen(false)}
+      />
+
+<NormalisationStatsModal 
+  open={isNormalisationStatsOpen}
+  onClose={() => setIsNormalisationStatsOpen(false)}
+/>
+
+  <DataDistribution 
+  open={isDataDistributionOpen}
+  onClose={() => setIsDataDistributionOpen(false)}
+/>
+ {/* Modal des Analytiques  */}
+      <AnalyticsModal 
+        open={isAnalyticsModalOpen}
+        onClose={() => setIsAnalyticsModalOpen(false)}
+      />
     </div>
   );
 };

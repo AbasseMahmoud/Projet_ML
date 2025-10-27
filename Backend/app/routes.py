@@ -33,42 +33,6 @@ def valeurs_aberrantes():
 
 
 
-# @bp.route('/analyse-metrics', methods=['GET'])
-# def get_analyse_metrics():
-#     try:
-#         import joblib
-#         import os
-
-#         filepath = 'Model/model_metrics.pkl'
-        
-#         # Si le fichier n'existe pas, utilisez les données simulées
-#         if not os.path.exists(filepath):
-#             print("⚠️ Fichier metrics non trouvé, utilisation des données simulées")
-#             return jsonify(get_mock_metrics())
-        
-#         model_metrics = joblib.load(filepath)
-
-#         if model_metrics is None:
-#             return jsonify(get_mock_metrics())
-
-#         print("✔️ Fichier chargé :", type(model_metrics))
-
-#         comparaison_df = analyser_model_metrics(model_metrics)
-
-#         if not isinstance(comparaison_df, pd.DataFrame):
-#             return jsonify(get_mock_metrics())
-
-#         return jsonify({
-#             'success': True,
-#             'data': comparaison_df.to_dict(orient='records')
-#         })
-
-#     except Exception as e:
-#         import traceback
-#         print("🔥 Erreur dans /analyse-metrics :", str(e))
-#         print("Utilisation des données simulées en fallback")
-#         return jsonify(get_mock_metrics())
-
 @bp.route('/analyse-metrics', methods=['GET'])
 def get_analyse_metrics():
     try:
@@ -77,12 +41,12 @@ def get_analyse_metrics():
 
         filepath = 'Model/model_metrics.pkl'
         
-        # Essayer de charger les vraies métriques
+        # chargement  des  métriques
         if os.path.exists(filepath):
-            print("✅ Chargement des VRAIES métriques depuis model_metrics.pkl")
+            print(" Chargement des VRAIES métriques depuis model_metrics.pkl")
             model_metrics = joblib.load(filepath)
             
-            # Utiliser la fonction analyser_model_metrics pour formater les données
+            # Utilisation de  la fonction analyser_model_metrics pour formater les données
             comparaison_df = analyser_model_metrics(model_metrics)
             
             return jsonify({
@@ -90,8 +54,8 @@ def get_analyse_metrics():
                 'data': comparaison_df.to_dict(orient='records')
             })
         else:
-            # Si le fichier n'existe pas, exécuter l'entraînement pour générer les vraies données
-            print("⚠️ Fichier metrics non trouvé, exécution de l'entraînement...")
+           
+            print(" Fichier metrics non trouvé, exécution de l'entraînement...")
             
             # Exécuter le pipeline d'entraînement
             pf = train_model()
@@ -121,10 +85,10 @@ def get_analyse_metrics():
 
     except Exception as e:
         import traceback
-        print("🔥 Erreur dans /analyse-metrics :", str(e))
+        print(" Erreur dans /analyse-metrics :", str(e))
         print(traceback.format_exc())
         
-        # En dernier recours, utiliser les données simulées CORRIGÉES avec les vraies valeurs
+        
         return jsonify({
             'success': False, 
             'data': get_mock_metrics_real(),
@@ -247,7 +211,7 @@ def get_valeurs_aberrantes_avant():
 def get_valeurs_aberrantes_apres():
     try:
         pf = train_model()
-        _, comparaison = corriger_valeurs_aberantes(pf)  # ✅ Utilise _ pour variable non utilisée
+        _, comparaison = corriger_valeurs_aberantes(pf)  
         
         return jsonify({
             'success': True,
@@ -279,88 +243,6 @@ def get_valeurs_aberrantes_comparaison():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-# Dans votre fichier Flask
-# @bp.route('/matrices-confusion', methods=['GET'])
-# def get_matrices_confusion():
-#     try:
-#         matrices_data = [
-#             {
-#                 'model': 'LogisticRegression',
-#                 'matrix': [[590, 14], [76, 0]],
-#                 'metrics': {
-#                     'true_negatives': 590,
-#                     'false_positives': 14,
-#                     'false_negatives': 76,
-#                     'true_positives': 0,
-#                     'precision': 0.0,
-#                     'recall': 0.0,
-#                     'f1_score': 0.0
-#                 }
-#             },
-#             {
-#                 'model': 'DecisionTree',
-#                 'matrix': [[560, 44], [34, 42]],
-#                 'metrics': {
-#                     'true_negatives': 560,
-#                     'false_positives': 44,
-#                     'false_negatives': 34,
-#                     'true_positives': 42,
-#                     'precision': 0.488,
-#                     'recall': 0.553,
-#                     'f1_score': 0.519
-#                 }
-#             },
-#             {
-#                 'model': 'RandomForest',
-#                 'matrix': [[565, 39], [31, 45]],
-#                 'metrics': {
-#                     'true_negatives': 565,
-#                     'false_positives': 39,
-#                     'false_negatives': 31,
-#                     'true_positives': 45,
-#                     'precision': 0.536,
-#                     'recall': 0.592,
-#                     'f1_score': 0.563
-#                 }
-#             },
-#             {
-#                 'model': 'KNeighbors',
-#                 'matrix': [[566, 38], [45, 31]],
-#                 'metrics': {
-#                     'true_negatives': 566,
-#                     'false_positives': 38,
-#                     'false_negatives': 45,
-#                     'true_positives': 31,
-#                     'precision': 0.449,
-#                     'recall': 0.408,
-#                     'f1_score': 0.428
-#                 }
-#             },
-#             {
-#                 'model': 'SVM',
-#                 'matrix': [[580, 24], [67, 9]],
-#                 'metrics': {
-#                     'true_negatives': 580,
-#                     'false_positives': 24,
-#                     'false_negatives': 67,
-#                     'true_positives': 9,
-#                     'precision': 0.273,
-#                     'recall': 0.118,
-#                     'f1_score': 0.166
-#                 }
-#             }
-#         ]
-
-#         for matrix_data in matrices_data:
-#             matrix_data['image'] = generate_confusion_matrix_image(
-#                 matrix_data['matrix'],
-#                 matrix_data['model']
-#             )
-
-#         return jsonify(matrices_data)
-
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
 
 @bp.route('/matrices-confusion', methods=['GET'])
 def get_matrices_confusion_dynamique():
@@ -559,7 +441,7 @@ def get_statistiques_normalisation():
     except Exception as e:
         print(f"ERREUR dans statistiques-normalisation: {str(e)}")
         import traceback
-        print(f"📋 Stack trace: {traceback.format_exc()}")
+        print(f" Stack trace: {traceback.format_exc()}")
         return jsonify({
             'success': False, 
             'error': str(e),
@@ -602,7 +484,7 @@ import joblib as jb
 @bp.route('/predict', methods=['POST'])
 def predict_fraud():
     try:
-        print("🔍 Début de la prédiction...")
+        print(" Début de la prédiction...")
         
         # 1. Charger le modèle et le scaler
         best_model_path = "Model/RandomForest_best_model.pkl"
@@ -613,11 +495,11 @@ def predict_fraud():
         scaler = jb.load(scaler_path)
         columns_to_normalize = jb.load(columns_path)
         
-        print("✅ Modèle et scaler chargés")
+        print(" Modèle et scaler chargés")
 
         # 2. Récupérer les données de la requête
         data = request.get_json()
-        print("📥 Données reçues:", data)
+        print(" Données reçues:", data)
 
         # 3. Mapping des données comme dans votre frontend
         features = {
@@ -660,20 +542,20 @@ def predict_fraud():
             features['TransactionCurrencyCode']
         ]], columns=feature_names)
 
-        print("📊 DataFrame créé:", input_df.shape)
-        print("🔍 Valeurs:", input_df.iloc[0].to_dict())
+        print(" DataFrame créé:", input_df.shape)
+        print(" Valeurs:", input_df.iloc[0].to_dict())
 
         # 5. Appliquer la normalisation uniquement aux colonnes spécifiques
         input_normalized = input_df.copy()
         
         # Vérifier les colonnes disponibles pour la normalisation
         available_columns = [col for col in columns_to_normalize if col in input_df.columns]
-        print(f"🎯 Colonnes à normaliser: {available_columns}")
+        print(f" Colonnes à normaliser: {available_columns}")
         
         if available_columns:
             input_normalized[available_columns] = scaler.transform(input_df[available_columns])
         
-        print("✅ Normalisation appliquée")
+        print(" Normalisation appliquée")
 
         # 6. Faire la prédiction
         prediction = model.predict(input_normalized)
@@ -690,7 +572,7 @@ def predict_fraud():
         else:
             risk_level = 'LOW'
 
-        print(f"🎯 Prédiction: {prediction[0]}, Probabilité fraude: {prob_fraud:.3f}")
+        print(f" Prédiction: {prediction[0]}, Probabilité fraude: {prob_fraud:.3f}")
 
         # 7. Retourner la réponse
         response = {
@@ -702,13 +584,13 @@ def predict_fraud():
             'confidence': max(prob_fraud, prob_legit)
         }
         
-        print("✅ Prédiction réussie:", response)
+        print(" Prédiction réussie:", response)
         return jsonify(response)
         
     except Exception as e:
-        print(f"❌ Erreur lors de la prédiction: {str(e)}")
+        print(f" Erreur lors de la prédiction: {str(e)}")
         import traceback
-        print(f"🔍 Stack trace: {traceback.format_exc()}")
+        print(f" Stack trace: {traceback.format_exc()}")
         
         return jsonify({
             'success': False, 

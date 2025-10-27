@@ -20,46 +20,17 @@ def train_model():
 
 dt = train_model()
 # Fonction pour valeurs manquantes
-print('abasssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss')
-print(dt.describe())
+# print('abasssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss')
+# print(dt.describe())
 
-print('dfghjjjjhhhhhhhhhhhhhhhhhhhhhhh')
-print(dt.shape)
+# print('dfghjjjjhhhhhhhhhhhhhhhhhhhhhhh')
+# print(dt.shape)
 def verifier_valeurs_manquantes(pf:pd.DataFrame):
     print("Valeurs manquantes")
     absentes = pf.isna().sum()
     print(absentes[absentes>0])
     return absentes.to_dict()
 
-# Fonction pour valeurs aberrantes (méthode IQR)
-# def verifier_valeur_aberantes(pf:pd.DataFrame):
-#     """
-#     Retourne un dictionnaire détaillé des valeurs aberrantes pour l'API
-#     """
-#     valeurs_aberante = {}
-#     print("Valeurs Aberantes avec IQR")
-#     colonnes_exclues = ['PotentialFraud']
-#     for col in pf.select_dtypes(include='number').columns:
-#         if col in colonnes_exclues:
-#             continue
-#         Q1 = pf[col].quantile(0.25)
-#         Q3 = pf[col].quantile(0.75)
-#         IQR = Q3 - Q1
-#         inf = Q1 - 1.5 * IQR
-#         sup = Q3 + 1.5 * IQR
-        
-#         # Compter les outliers
-#         count_outliers = pf[(pf[col] < inf) | (pf[col] > sup)].shape[0]
-        
-#         if count_outliers > 0:
-#             valeurs_aberante[col] = {
-#                 'count': int(count_outliers),
-#                 'borne_inf': float(inf),
-#                 'borne_sup': float(sup),
-#                 'pourcentage': float((count_outliers / len(pf)) * 100),
-#                 'min_original': float(pf[col].min()),
-#                 'max_original': float(pf[col].max())
-#             }
 
 def verifier_valeur_aberantes(pf: pd.DataFrame):
     """
@@ -103,45 +74,6 @@ def verifier_valeur_aberantes(pf: pd.DataFrame):
             }
 
     return valeurs_aberante
-#     return valeurs_aberante
-
-# Coorection des valeurs aberantes
-# def corriger_valeurs_aberantes(pf: pd.DataFrame):
-#     """
-#     Corrige les valeurs aberrantes et retourne les stats avant/après pour l'API
-#     """
-#     pf_corrige = pf.copy()
-    
-#     # Calcul des valeurs aberrantes AVANT correction
-#     valeurs_avant = verifier_valeur_aberantes(pf)
-    
-#     # Application de la correction
-#     for col in pf_corrige.select_dtypes(include='number').columns:
-#         Q1 = pf_corrige[col].quantile(0.25)
-#         Q3 = pf_corrige[col].quantile(0.75)
-#         IQR = Q3 - Q1
-#         inf = Q1 - 1.5 * IQR
-#         sup = Q3 + 1.5 * IQR
-        
-#         pf_corrige[col] = pf_corrige[col].clip(lower=inf, upper=sup)
-    
-#     # Calcul des valeurs aberrantes APRÈS correction
-#     valeurs_apres = verifier_valeur_aberantes(pf_corrige)
-    
-#     # Préparation des résultats pour l'API
-#     resultat_comparaison = {
-#         'avant_correction': valeurs_avant,
-#         'apres_correction': valeurs_apres,
-#         'statistiques_globales': {
-#             'total_avant': sum([v['count'] for v in valeurs_avant.values()]),
-#             'total_apres': sum([v['count'] for v in valeurs_apres.values()]),
-#             'reduction': sum([v['count'] for v in valeurs_avant.values()]) - sum([v['count'] for v in valeurs_apres.values()]),
-#             'pourcentage_reduction': ((sum([v['count'] for v in valeurs_avant.values()]) - sum([v['count'] for v in valeurs_apres.values()])) / 
-#                                     sum([v['count'] for v in valeurs_avant.values()]) * 100) if sum([v['count'] for v in valeurs_avant.values()]) > 0 else 0
-#         }
-#     }
-    
-#     return pf_corrige, resultat_comparaison
 
 
 
@@ -227,31 +159,10 @@ def preparer_donnees(test_size=0.3, random_state=42):
     print("\nTest :")
     print(Y_test.value_counts())
     print("\nDataset complet :")
-    print(pf['PotentialFraud'].value_counts())
-    print(pf['PotentialFraud'].value_counts())
+    # print(pf['PotentialFraud'].value_counts())
     return X_train, X_test, Y_train, Y_test, pf
 
-  
-#  Correction déséquilibre avec SMOTE
-# def appliquer_smote(X_train, Y_train, random_state=42):
-#     """
-#     Applique SMOTE sur les variables numériques du jeu d'entraînement.
-
-#     Retourne :
-#     - X_train_res : features après suréchantillonnage
-#     - Y_train_res : labels après suréchantillonnage
-#     """
-#     print("\n  Correction du déséquilibre avec SMOTE...")
-
-#     x_numerique = X_train.select_dtypes(include=['number'])
-
-#     smote = SMOTE(random_state=random_state)
-#     x_train_res, y_train_res = smote.fit_resample(x_numerique, Y_train)
-
-#     print("\n Distribution après SMOTE (train) :")
-#     print(pd.Series(y_train_res).value_counts())
-
-#     return x_train_res, y_train_res
+# SMOTE CORRECTION DESEQUILIBRE
 
 def appliquer_smote(X_train, Y_train, random_state=42):
     """
@@ -261,9 +172,9 @@ def appliquer_smote(X_train, Y_train, random_state=42):
 
     x_numerique = X_train.select_dtypes(include=['number'])
 
-    # CORRECTION : Spécifiez un ratio réaliste
+    
     smote = SMOTE(
-        sampling_strategy=0.3,  # 30% de fraudes (au lieu de 50%)
+        sampling_strategy=0.3,  # 30% de fraudes 
         random_state=random_state
     )
     
@@ -276,9 +187,9 @@ def appliquer_smote(X_train, Y_train, random_state=42):
     fraud_ratio_before = (Y_train.sum() / len(Y_train)) * 100
     fraud_ratio_after = (y_train_res.sum() / len(y_train_res)) * 100
     
-    print(f"\n📊 Ratio fraude avant : {fraud_ratio_before:.1f}%")
-    print(f"📊 Ratio fraude après : {fraud_ratio_after:.1f}%")
-    print(f"📈 Échantillons fraudes générés : {y_train_res.sum() - Y_train.sum()}")
+    print(f"\n Ratio fraude avant : {fraud_ratio_before:.1f}%")
+    print(f" Ratio fraude après : {fraud_ratio_after:.1f}%")
+    print(f" Échantillons fraudes générés : {y_train_res.sum() - Y_train.sum()}")
 
     return x_train_res, y_train_res
 # Normalisation des donnees numeriques
@@ -325,82 +236,6 @@ def appliquer_normalisation(x_train_res, X_test):
     
     return x_train_normaliser, x_test_numeric_normaliser, normaliser
 
-# def entrainer_et_evaluer_modeles(
-#     x_train_res, y_train_res,
-#     x_train_normalise, x_test, x_test_normalise,
-#     y_test
-# ):
-#     """
-#     Entraîne plusieurs modèles, calcule les métriques et retourne :
-#     - df_results : tableau des scores
-#     - model_metrics : dict avec scores + matrice de confusion (VP, FP, FN, VN)
-#     - model_instances : les modèles entraînés pour affichage ou sauvegarde
-#     """
-
-#     models = {
-#         'LogisticRegression': LogisticRegression(),
-#         'DecisionTree': DecisionTreeClassifier(),
-#         'RandomForest': RandomForestClassifier(),
-#         'KNeighbors': KNeighborsClassifier(),
-#         'SVM': SVC()
-#     }
-
-#     results = {}
-#     model_metrics = {}  
-#     model_instances = {}
-
-#     for name, model in models.items():
-#         print(f"\n=== Entraînement : {name} ===")
-
-#         # Choix des données selon le modèle
-#         if name in ['DecisionTree', 'RandomForest']:
-#             model.fit(x_train_res, y_train_res)
-#             x_test_utilise = x_test.select_dtypes(include=['number'])
-#         else:
-#             model.fit(x_train_normalise, y_train_res)
-#             x_test_utilise = x_test_normalise
-
-#         # Prédiction
-#         y_pred = model.predict(x_test_utilise)
-
-#         # Matrice de confusion
-#         mc = confusion_matrix(y_test, y_pred)
-#         VN, FP = mc[0]
-#         FN, VP = mc[1]
-
-#         # Métriques
-#         acc = accuracy_score(y_test, y_pred)
-#         prec = precision_score(y_test, y_pred, zero_division=0)
-#         rec = recall_score(y_test, y_pred, zero_division=0)
-#         f1 = f1_score(y_test, y_pred, zero_division=0)
-
-#         # Stockage
-#         results[name] = [acc, prec, rec, f1]
-#         model_metrics[name] = {
-#             'accuracy': acc,
-#             'precision': prec,
-#             'recall': rec,
-#             'f1_score': f1,
-#             'VP': VP,
-#             'FP': FP,
-#             'FN': FN,
-#             'VN': VN
-#         }
-
-#         model_instances[name] = model
-
-#         # Affichage console
-#         print(f"Accuracy : {acc:.4f}")
-#         print(f"Precision : {prec:.4f}")
-#         print(f"Recall : {rec:.4f}")
-#         print(f"F1-score : {f1:.4f}")
-
-#     # Résumé final
-#     df_results = pd.DataFrame(results, index=["Accuracy", "Precision", "Recall", "F1-score"]).T
-#     print("\n=== Résumé comparatif des modèles ===")
-#     print(df_results)
-
-#     return df_results, model_metrics, model_instances
 
 
 def entrainer_et_evaluer_modeles(
@@ -422,7 +257,7 @@ def entrainer_et_evaluer_modeles(
     results = {}
     model_metrics = {}  
     model_instances = {}
-    predictions = {}  # Nouveau: stocker les prédictions
+    predictions = {}  #  stocker les prédictions
 
     for name, model in models.items():
         print(f"\n=== Entraînement : {name} ===")
@@ -461,7 +296,7 @@ def entrainer_et_evaluer_modeles(
             'FP': FP,
             'FN': FN,
             'VN': VN,
-            'confusion_matrix': mc.tolist()  # Ajouter la matrice complète
+            'confusion_matrix': mc.tolist() 
         }
 
         model_instances[name] = model
@@ -469,7 +304,7 @@ def entrainer_et_evaluer_modeles(
     # Résumé final
     df_results = pd.DataFrame(results, index=["Accuracy", "Precision", "Recall", "F1-score"]).T
     
-    return df_results, model_metrics, model_instances, predictions  # Retourner aussi les prédictions
+    return df_results, model_metrics, model_instances, predictions 
 
 def afficher_matrices_confusion(models, X_test, x_test_normalise, Y_test):
     """
@@ -532,17 +367,17 @@ def analyser_model_metrics(model_metrics):
         
         # Analyse basée sur le F1-score
         if f1 == 0:
-            commentaire = "❌ Modèle inefficace - Aucune fraude détectée"
+            commentaire = " Modèle inefficace - Aucune fraude détectée"
         elif f1 < 0.3:
-            commentaire = "⚠️ Performances très faibles - Presque aucune détection"
+            commentaire = " Performances très faibles - Presque aucune détection"
         elif f1 < 0.5:
-            commentaire = "⚠️ Performances médiocres - Détection limitée"
+            commentaire = " Performances médiocres - Détection limitée"
         elif f1 < 0.6:
-            commentaire = "✅ Performances acceptables - Détection modérée"
+            commentaire = " Performances acceptables - Détection modérée"
         elif f1 < 0.7:
-            commentaire = "✅ Bonnes performances - Bon équilibre"
+            commentaire = " Bonnes performances - Bon équilibre"
         else:
-            commentaire = "🎉 Excellentes performances - Détection optimale"
+            commentaire = " Excellentes performances - Détection optimale"
 
         # Détails spécifiques par modèle
         if recall < 0.3:
@@ -592,7 +427,7 @@ def sauvegarder_metriques(model_metrics, dossier="Model"):
     """
     chemin_fichier = f"{dossier}/model_metrics.pkl"
     jb.dump(model_metrics, chemin_fichier)
-    print(f"✅ Métriques sauvegardées dans '{chemin_fichier}'")
+    print(f" Métriques sauvegardées dans '{chemin_fichier}'")
     
     # Sauvegarde également en CSV pour backup
     df_metrics = pd.DataFrame([
@@ -618,7 +453,7 @@ def sauvegarder_splits(X_train, X_test, Y_train, Y_test, dossier="Model"):
     jb.dump(X_test, f"{dossier}/X_test.pkl")
     jb.dump(Y_train, f"{dossier}/Y_train.pkl")
     jb.dump(Y_test, f"{dossier}/Y_test.pkl")
-    print("✅ Splits sauvegardés pour reproductibilité")
+    print(" Splits sauvegardés pour reproductibilité")
 
 def charger_splits(dossier="Model"):
     """Charge les splits sauvegardés"""
@@ -627,12 +462,12 @@ def charger_splits(dossier="Model"):
         X_test = jb.load(f"{dossier}/X_test.pkl")
         Y_train = jb.load(f"{dossier}/Y_train.pkl")
         Y_test = jb.load(f"{dossier}/Y_test.pkl")
-        print("✅ Splits chargés depuis sauvegarde")
+        print(" Splits chargés depuis sauvegarde")
         return X_train, X_test, Y_train, Y_test
     except:
-        print("❌ Splits non trouvés, génération nouvelle...")
+        print(" Splits non trouvés, génération nouvelle...")
         return None
-        # ⚠️ SUPPRIMEZ CETTE LIGNE : sauvegarder_splits()  # ← CETTE LIGNE CAUSE L'ERREUR
+       
 
 # # 1. Chargement et vérification données
 pf = train_model()  # Charge les données
@@ -642,7 +477,6 @@ pf_corrige, _ = corriger_valeurs_aberantes(pf) # Corrige outliers
 print(verifier_doublons(pf_corrige))          # Vérifie doublons
 pf_nettoye = supprmer_doublons(pf_corrige)    # Supprime doublons
 
-# sauvegarder_splits(X_train, X_test, Y_train, Y_test)
 # 2. Préparation données : séparation train/test
 X_train, X_test, Y_train, Y_test, pf = preparer_donnees(random_state=42)
 
@@ -779,37 +613,6 @@ sauvegarder_meilleur_modele(df_results, models_entraine)
 x_train_norm, X_test_norm, scaler = appliquer_normalisation(X_train_res, X_test)
 
 
-
-# Affichage supplémentaire après l'appel
-# print("\n=== CONFIRMATION NORMALISATION ===")
-# print(f"Type de X_train_norm : {type(X_train_norm)}")
-# print(f"Dimensions X_train_norm : {X_train_norm.shape}")
-# print(f"Dimensions X_test_norm : {X_test_norm.shape}")
-
-# # Vérification que la normalisation a bien fonctionné
-# print("nVérification StandardScaler :")
-# print(f"Moyenne (devrait être ~0) : {X_train_norm.mean():.8f}")
-# print(f"Écart-type (devrait être ~1) : {X_train_norm.std():.8f}")
-
-# # 1. Chargement et vérification données
-# pf = train_model()
-# verifier_valeurs_manquantes(pf)
-
-# # AVANT correction
-# print("\n=== AVANT CORRECTION VALEURS ABERRANTES ===")
-# valeurs_avant = verifier_valeur_aberantes(pf)
-
-# # CORRECTION
-# pf_corrige = corriger_valeurs_aberantes(pf)
-
-# # APRÈS correction
-# print("\n=== APRÈS CORRECTION VALEURS ABERRANTES ===")
-# valeurs_apres = verifier_valeur_aberantes(pf_corrige)
-
-# print("\n=== COMPARAISON ===")
-# print(f"Valeurs aberrantes avant : {sum(valeurs_avant.values())}")
-# print(f"Valeurs aberrantes après : {sum(valeurs_apres.values())}")
-
 def get_normalisation_stats():
     """
     Retourne les statistiques de normalisation pour l'API
@@ -845,7 +648,7 @@ def get_normalisation_stats():
         }
         
         # CORRECTION : Calcul des statistiques APRÈS normalisation
-        # X_train_norm est un DataFrame, utiliser .mean().mean()
+        # X_train_norm est un DataFrame, on  utilise .mean().mean()
         stats_apres = {
             'moyenne_globale': float(X_train_norm.mean().mean()),
             'ecart_type_globale': float(X_train_norm.std().mean()),
@@ -861,9 +664,9 @@ def get_normalisation_stats():
         verification = {
             'moyenne_proche_zero': 'oui' if moyenne_abs < 0.01 else 'non',
             'ecart_type_proche_un': 'oui' if ecart_type_abs < 0.1 else 'non',
-            'score_qualite': '✅ Excellente' if moyenne_abs < 0.01 and ecart_type_abs < 0.1 
-                            else '⚠️ Correcte' if moyenne_abs < 0.1 and ecart_type_abs < 0.5 
-                            else '❌ À vérifier',
+            'score_qualite': ' Excellente' if moyenne_abs < 0.01 and ecart_type_abs < 0.1 
+                            else 'Correcte' if moyenne_abs < 0.1 and ecart_type_abs < 0.5 
+                            else ' À vérifier',
             'moyenne_calculee': float(X_train_norm.mean().mean()),
             'ecart_type_calcule': float(X_train_norm.std().mean()),
             'seuil_moyenne': 0.01,
@@ -911,13 +714,13 @@ def get_normalisation_stats():
             }
         }
         
-        print("✅ Statistiques de normalisation calculées avec succès")
+        print("Statistiques de normalisation calculées avec succès")
         return resultat
         
     except Exception as e:
-        print(f"❌ Erreur dans get_normalisation_stats: {str(e)}")
+        print(f" Erreur dans get_normalisation_stats: {str(e)}")
         import traceback
-        print(f"🔍 Stack trace: {traceback.format_exc()}")
+        print(f" Stack trace: {traceback.format_exc()}")
         
         # Retourner des données par défaut en cas d'erreur
         return {

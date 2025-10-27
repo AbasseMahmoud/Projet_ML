@@ -14,7 +14,7 @@ interface ConfusionMatrixData {
     precision: number;
     recall: number;
     f1_score: number;
-    accuracy?: number; // Ajout optionnel
+    accuracy?: number; 
   };
 }
 
@@ -39,7 +39,7 @@ const ConfusionMatrices: React.FC<ConfusionMatricesProps> = ({ open, onClose }) 
     setLoading(true);
     setError(null);
     try {
-      // CORRECTION : Utiliser la bonne URL de l'API Flask
+      //  URL de l'API Flask
       const response = await fetch('http://localhost:5000/api/matrices-confusion');
       
       if (!response.ok) {
@@ -76,7 +76,7 @@ const ConfusionMatrices: React.FC<ConfusionMatricesProps> = ({ open, onClose }) 
     }
   };
 
-  // CORRECTION : Vérifier que matrices est un tableau avant d'utiliser .find()
+  
   const selectedMatrix = matrices && Array.isArray(matrices) 
     ? matrices.find(matrix => matrix.model === selectedModel)
     : null;
@@ -188,7 +188,7 @@ const ConfusionMatrices: React.FC<ConfusionMatricesProps> = ({ open, onClose }) 
                         }}
                       />
                       <div className="hidden text-center p-8 bg-slate-100 rounded-lg">
-                        <div className="text-slate-400 text-4xl mb-2">📊</div>
+                        <div className="text-slate-400 text-4xl mb-2"></div>
                         <p className="text-slate-500">Image non disponible</p>
                       </div>
                     </div>
@@ -279,7 +279,7 @@ const ConfusionMatrices: React.FC<ConfusionMatricesProps> = ({ open, onClose }) 
                 </div>
               ) : (
                 <div className="text-center py-12 bg-slate-50 rounded-2xl border border-slate-200/60">
-                  <div className="text-slate-400 text-6xl mb-4">📊</div>
+                  <div className="text-slate-400 text-6xl mb-4"></div>
                   <h3 className="text-lg font-semibold text-slate-900 mb-2">Aucune matrice sélectionnée</h3>
                   <p className="text-slate-500">Choisissez un modèle dans la liste pour voir sa matrice de confusion</p>
                 </div>
@@ -292,7 +292,6 @@ const ConfusionMatrices: React.FC<ConfusionMatricesProps> = ({ open, onClose }) 
   );
 };
 
-// Fonction de secours améliorée
 const getFallbackMatrices = (): ConfusionMatrixData[] => [
   {
     model: 'RandomForest',

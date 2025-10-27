@@ -101,7 +101,7 @@ const TransactionnelModal = ({ open, onClose, onSave }) => {
         isFraud: true,
         status: 'FRAUDE DÉTECTÉE',
         color: 'red',
-        icon: '🚨',
+        icon: '',
         description: 'Transaction suspecte - Intervention requise'
       };
     } else {
@@ -109,7 +109,7 @@ const TransactionnelModal = ({ open, onClose, onSave }) => {
         isFraud: false,
         status: 'TRANSPARENT',
         color: 'green',
-        icon: '✅',
+        icon: '',
         description: 'Transaction sécurisée'
       };
     }
@@ -162,7 +162,7 @@ const TransactionnelModal = ({ open, onClose, onSave }) => {
       onSave(transactionWithPrediction);
     } catch (error) {
       console.error('Erreur lors de l\'analyse:', error);
-      // Vous pouvez ajouter un message d'erreur à l'utilisateur ici
+     
     }
   };
 

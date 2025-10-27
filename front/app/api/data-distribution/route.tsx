@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    console.log('🔄 Tentative de connexion à Flask pour données SMOTE...');
+    console.log(' Tentative de connexion à Flask pour données SMOTE...');
     
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
@@ -25,7 +25,7 @@ export async function GET() {
     }
 
     const data = await flaskResponse.json();
-    console.log('✅ Données SMOTE reçues de Flask:', data);
+    console.log(' Données SMOTE reçues de Flask:', data);
     
     return NextResponse.json({
       ...data,

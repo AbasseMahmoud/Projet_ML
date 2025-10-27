@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    console.log('🔄 Fetching data quality from Flask...');
+    console.log(' Fetching data quality from Flask...');
     
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
@@ -25,14 +25,14 @@ export async function GET() {
     }
 
     const data = await flaskResponse.json();
-    console.log('✅ Data quality received from Flask:', data);
+    console.log('Data quality received from Flask:', data);
     
     return NextResponse.json(data);
     
   } catch (error) {
-    console.error('❌ Error fetching data quality:', error);
+    console.error(' Error fetching data quality:', error);
     
-    // ⚠️ SUPPRIMEZ LES DONNÉES MOCK - retournez une erreur propre
+    
     return NextResponse.json(
       { 
         success: false, 

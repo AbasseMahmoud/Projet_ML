@@ -75,13 +75,13 @@ const Dashboard = () => {
         <nav className="flex-1 mt-8 px-4">
           {[
            
-            { 
-              id: 'normalisation',  
-              name: 'Normalisation', 
-              icon: '⚖️', 
-              badge: 'New',
-              onClick: () => setIsNormalisationStatsOpen(true)
-            },
+            // { 
+            //   id: 'normalisation',  
+            //   name: 'Normalisation', 
+            //   icon: '⚖️', 
+            //   badge: 'New',
+            //   onClick: () => setIsNormalisationStatsOpen(true)
+            // },
             { 
               id: 'transactions', 
               name: 'Transactions', 
@@ -125,8 +125,6 @@ const Dashboard = () => {
             badge: 'New',
             onClick: () => setIsDataDistributionOpen(true)
           },
-          { id: 'reports', name: 'Rapports', icon: '📋', badge: null },
-            { id: 'settings', name: 'Paramètres', icon: '⚙️', badge: null }
           ].map((item) => (
             <button
               key={item.id}

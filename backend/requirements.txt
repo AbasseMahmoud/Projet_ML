@@ -59,3 +59,4 @@ python-dotenv==1.0.0
 SQLAlchemy==2.0.23
 typing_extensions==4.8.0
 Werkzeug==2.3.7
+

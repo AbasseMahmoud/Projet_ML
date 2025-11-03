@@ -1,5 +1,6 @@
 // services/apiService.js
-import { API_CONFIG } from '../lib/api';
+// import { API_CONFIG } from '../lib/api';
+import { API_CONFIG, getApiUrl } from '../lib/api';
 
 class ApiService {
   async request(endpoint, options = {}) {

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { apiService } from '../services/apiService';
 
 interface Alert {
   id: number;
@@ -66,36 +67,76 @@ const AlertsModal: React.FC<AlertsModalProps> = ({
     }
   }, [open, activeTab]);
 
+  // const fetchModelMetrics = async () => {
+  //   setLoading(true);
+  //   setError(null);
+  //   try {
+  //     const response = await fetch('/api/analyse-metrics');
+  //     if (!response.ok) throw new Error('Erreur lors de la récupération des métriques');
+  //     const data = await response.json();
+  //     if (data.success) {
+  //       setModelMetrics(data.data);
+  //     } else {
+  //       throw new Error(data.error);
+  //     }
+  //   } catch (err) {
+  //     setError(err instanceof Error ? err.message : 'Erreur inconnue');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const fetchModelMetrics = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/analyse-metrics');
-      if (!response.ok) throw new Error('Erreur lors de la récupération des métriques');
-      const data = await response.json();
+      // REMPLACÉ : Utilisation du service API
+      const data = await apiService.getStats();
+      
       if (data.success) {
         setModelMetrics(data.data);
       } else {
-        throw new Error(data.error);
+        throw new Error(data.error || 'Erreur inconnue');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
+      console.error('Erreur fetch metrics:', err);
     } finally {
       setLoading(false);
     }
   };
+  // const fetchAllDataQuality = async () => {
+  //   setLoading(true);
+  //   setError(null);
+  //   try {
+  //     const qualityResponse = await fetch('/api/data-quality');
+  //     if (!qualityResponse.ok) throw new Error('Erreur data-quality');
+  //     const qualityData = await qualityResponse.json();
+      
+  //     if (qualityData.success) {
+  //       setDataQuality(qualityData.data);
+  //     } else {
+  //       await fetchIndividualQualityData();
+  //     }
+  //   } catch (err) {
+  //     // Fallback: Récupérer les données individuellement
+  //     await fetchIndividualQualityData();
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const fetchAllDataQuality = async () => {
     setLoading(true);
     setError(null);
     try {
-      const qualityResponse = await fetch('/api/data-quality');
-      if (!qualityResponse.ok) throw new Error('Erreur data-quality');
-      const qualityData = await qualityResponse.json();
+      // REMPLACÉ : Utilisation du service API
+      const qualityData = await apiService.getDataQuality();
       
       if (qualityData.success) {
         setDataQuality(qualityData.data);
       } else {
+        // Fallback: Récupérer les données individuellement
         await fetchIndividualQualityData();
       }
     } catch (err) {
@@ -106,24 +147,40 @@ const AlertsModal: React.FC<AlertsModalProps> = ({
     }
   };
 
+  // const fetchIndividualQualityData = async () => {
+  //   try {
+  //     const [doublonsRes, manquantesRes] = await Promise.all([
+  //       fetch('/api/doublons'),
+  //       fetch('/api/valeurs-manquantes')
+  //     ]);
+
+  //     const doublonsData = await doublonsRes.json();
+  //     const manquantesData = await manquantesRes.json();
+
+  //     if (doublonsData.success) setDoublons(doublonsData.data);
+  //     if (manquantesData.success) setValeursManquantes(manquantesData.data);
+
+  //   } catch (err) {
+  //     setError('Erreur lors de la récupération des données de qualité');
+  //   }
+  // };
+
   const fetchIndividualQualityData = async () => {
     try {
-      const [doublonsRes, manquantesRes] = await Promise.all([
-        fetch('/api/doublons'),
-        fetch('/api/valeurs-manquantes')
+      // REMPLACÉ : Utilisation des services API
+      const [doublonsData, manquantesData] = await Promise.all([
+        apiService.getDoublons(),
+        apiService.getValeursManquantes()
       ]);
-
-      const doublonsData = await doublonsRes.json();
-      const manquantesData = await manquantesRes.json();
 
       if (doublonsData.success) setDoublons(doublonsData.data);
       if (manquantesData.success) setValeursManquantes(manquantesData.data);
 
     } catch (err) {
       setError('Erreur lors de la récupération des données de qualité');
+      console.error('Erreur fetch individual quality:', err);
     }
   };
-
   const getQualityColor = (count: number, total: number) => {
     const percentage = (count / total) * 100;
     if (percentage < 1) return 'text-green-600 bg-green-50 border-green-200';

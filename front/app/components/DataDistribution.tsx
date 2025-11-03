@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { apiService } from '../services/apiService';
 
 interface DistributionData {
   before_smote: {
@@ -36,6 +37,38 @@ const DataDistribution: React.FC<DataDistributionProps> = ({ open, onClose }) =>
     }
   }, [open]);
 
+  // const fetchDistribution = async () => {
+  //   setLoading(true);
+  //   setError(null);
+  //   setDistribution(null);
+    
+  //   try {
+  //     console.log(' Fetching dynamic data from Flask...');
+  //     const response = await fetch('/api/data-distribution');
+      
+  //     if (!response.ok) {
+  //       const errorData = await response.json();
+  //       throw new Error(errorData.error || `Erreur HTTP: ${response.status}`);
+  //     }
+      
+  //     const data: DistributionData = await response.json();
+      
+  //     if (data.error) {
+  //       throw new Error(data.error);
+  //     }
+      
+  //     console.log(' Dynamic data received:', data);
+  //     setDistribution(data);
+      
+  //   } catch (err) {
+  //     const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
+  //     setError(errorMessage);
+  //     console.error(' Erreur fetch distribution:', err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const fetchDistribution = async () => {
     setLoading(true);
     setError(null);
@@ -43,18 +76,12 @@ const DataDistribution: React.FC<DataDistributionProps> = ({ open, onClose }) =>
     
     try {
       console.log(' Fetching dynamic data from Flask...');
-      const response = await fetch('/api/data-distribution');
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Erreur HTTP: ${response.status}`);
-      }
+      // REMPLACER CETTE LIGNE :
+      // const response = await fetch('/api/data-distribution');
       
-      const data: DistributionData = await response.json();
-      
-      if (data.error) {
-        throw new Error(data.error);
-      }
+      // PAR CELLE-CI :
+      const data: DistributionData = await apiService.getDataDistribution();
       
       console.log(' Dynamic data received:', data);
       setDistribution(data);
@@ -63,11 +90,13 @@ const DataDistribution: React.FC<DataDistributionProps> = ({ open, onClose }) =>
       const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
       setError(errorMessage);
       console.error(' Erreur fetch distribution:', err);
+      
+      // Optionnel : utiliser des données de secours en cas d'erreur
+      // setDistribution(getFallbackDistribution());
     } finally {
       setLoading(false);
-    }
-  };
-
+    } 
+};
   const retryWithFallback = () => {
     setError('Veuillez vérifier que le serveur Flask est démarré sur le port 5000');
   };

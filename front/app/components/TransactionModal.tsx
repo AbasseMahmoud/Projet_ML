@@ -1,24 +1,39 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const TransactionnelModal = ({ open, onClose, onSave }) => {
+interface TransactionModalProps {
+  open: boolean;
+  onClose: () => void;
+  onSave: (data?: any) => void;
+}
+
+// Interface pour la prédiction
+interface PredictionData {
+  prediction: number;
+  probability_fraud?: number;
+  probability?: number;
+  risk_level?: string;
+  is_fraud?: boolean;
+}
+
+const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, onSave }) => {
   const [analyzing, setAnalyzing] = useState(false);
-  const [prediction, setPrediction] = useState(null);
-  const [errors, setErrors] = useState({});
+  const [prediction, setPrediction] = useState<PredictionData | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   
   if (!open) return null;
 
   // Fonction de validation des champs
-  const validateForm = (formData) => {
-    const newErrors = {};
+  const validateForm = (formData: FormData): Record<string, string> => {
+    const newErrors: Record<string, string> = {};
     const requiredFields = [
-      'gender', 'age', 'houseTypeID', 'contactAvaliabilityID', 
+      'gender', 'age', 'houseTypeID', 'contactAvaliabilityID',
       'homeCountry', 'accountNo', 'cardExpiryDate', 'transactionAmount',
       'transactionCountry', 'productID', 'cif', 'transactionCurrencyCode'
     ];
 
     requiredFields.forEach(field => {
-      const value = formData.get(field);
+      const value = formData.get(field) as string | null;
       if (!value || value.trim() === '') {
         newErrors[field] = 'Ce champ est obligatoire';
       } else if (field === 'transactionAmount' && parseFloat(value) <= 0) {
@@ -31,38 +46,8 @@ const TransactionnelModal = ({ open, onClose, onSave }) => {
     return newErrors;
   };
 
-  // Fonction pour analyser la transaction
-  const analyzeTransaction = async (transactionData) => {
-    setAnalyzing(true);
-    try {
-      const modelData = mapToModelFeatures(transactionData);
-      console.log('Données envoyées au modèle:', modelData);
-      
-      const response = await axios.post('http://localhost:5000/api/predict', modelData, {
-        timeout: 10000,
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-      
-      if (response.data.success) {
-        setPrediction(response.data);
-        return response.data;
-      } else {
-        console.error('Erreur prédiction:', response.data.error);
-        throw new Error(response.data.error || 'Erreur de prédiction');
-      }
-    } catch (error) {
-      console.error('Erreur API:', error);
-      throw error;
-    } finally {
-      setAnalyzing(false);
-    }
-  };
-
   // Mapping EXACT selon vos données avec validation
-  const mapToModelFeatures = (formData) => {
-    // Validation supplémentaire côté client
+  const mapToModelFeatures = (formData: any) => {
     const features = {
       Gender: parseInt(formData.gender) || 0,
       Age: parseInt(formData.age) || 0,
@@ -81,7 +66,7 @@ const TransactionnelModal = ({ open, onClose, onSave }) => {
 
     // Vérifier qu'aucune valeur n'est NaN
     Object.keys(features).forEach(key => {
-      if (isNaN(features[key])) {
+      if (isNaN((features as any)[key])) {
         throw new Error(`Valeur invalide pour ${key}`);
       }
     });
@@ -89,19 +74,50 @@ const TransactionnelModal = ({ open, onClose, onSave }) => {
     return features;
   };
 
+  // Fonction pour analyser la transaction
+  const analyzeTransaction = async (transactionData: Record<string, any>): Promise<PredictionData> => {
+    setAnalyzing(true);
+    try {
+      const modelData = mapToModelFeatures(transactionData);
+      console.log('Données envoyées au modèle:', modelData);
+      
+      const response = await axios.post('https://projet-ml-uxvm.onrender.com/predict', modelData, {
+        timeout: 10000,
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (response.data) {
+        const predictionData: PredictionData = {
+          prediction: response.data.prediction || (response.data.is_fraud ? 1 : 0),
+          probability_fraud: response.data.probability_fraud || response.data.probability || 0,
+          risk_level: response.data.risk_level || 'FAIBLE'
+        };
+        setPrediction(predictionData);
+        return predictionData;
+      } else {
+        throw new Error('Erreur de prédiction');
+      }
+    } catch (error) {
+      console.error('Erreur API:', error);
+      throw error;
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
   // Fonction pour déterminer le statut de fraude
-  const getFraudStatus = (predictionData) => {
+  const getFraudStatus = (predictionData: PredictionData | null) => {
     if (!predictionData) return { isFraud: false, status: 'Indéterminé', color: 'gray' };
     
     const isFraud = predictionData.prediction === 1;
-    const probability = predictionData.probability_fraud * 100;
+    const probability = (predictionData.probability_fraud || 0) * 100;
     
     if (isFraud) {
       return {
         isFraud: true,
         status: 'FRAUDE DÉTECTÉE',
         color: 'red',
-        icon: '',
+        icon: '🚨',
         description: 'Transaction suspecte - Intervention requise'
       };
     } else {
@@ -109,46 +125,28 @@ const TransactionnelModal = ({ open, onClose, onSave }) => {
         isFraud: false,
         status: 'TRANSPARENT',
         color: 'green',
-        icon: '',
+        icon: '✅',
         description: 'Transaction sécurisée'
       };
     }
   };
 
-  const handleSubmit = async (e) => {
+  // Gestion de la soumission du formulaire
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
+    const formData = new FormData(e.currentTarget);
     
-    // Validation des champs
     const formErrors = validateForm(formData);
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
       return;
     }
 
-    // Réinitialiser les erreurs
     setErrors({});
-
-    const transactionData = {
-      gender: formData.get('gender'),
-      age: formData.get('age'),
-      houseTypeID: formData.get('houseTypeID'),
-      contactAvaliabilityID: formData.get('contactAvaliabilityID'),
-      homeCountry: formData.get('homeCountry'),
-      accountNo: formData.get('accountNo'),
-      cardExpiryDate: formData.get('cardExpiryDate'),
-      transactionAmount: formData.get('transactionAmount'),
-      transactionCountry: formData.get('transactionCountry'),
-      productID: formData.get('productID'),
-      cif: formData.get('cif'),
-      transactionCurrencyCode: formData.get('transactionCurrencyCode')
-    };
-
+    const transactionData = Object.fromEntries(formData.entries());
+    
     try {
-      // Analyser la transaction
       const fraudPrediction = await analyzeTransaction(transactionData);
-      
-      // Sauvegarder avec prédiction
       const transactionWithPrediction = {
         ...transactionData,
         fraudPrediction: fraudPrediction || {
@@ -158,16 +156,14 @@ const TransactionnelModal = ({ open, onClose, onSave }) => {
         },
         analyzedAt: new Date().toISOString()
       };
-
       onSave(transactionWithPrediction);
     } catch (error) {
       console.error('Erreur lors de l\'analyse:', error);
-     
     }
   };
 
   // Fonction pour gérer le changement des champs et effacer les erreurs
-  const handleInputChange = (fieldName) => {
+  const handleInputChange = (fieldName: string) => {
     if (errors[fieldName]) {
       setErrors(prev => ({
         ...prev,
@@ -177,7 +173,7 @@ const TransactionnelModal = ({ open, onClose, onSave }) => {
   };
 
   // Composant de champ avec validation
-  const FormField = ({ name, label, type = "number", placeholder, step, min, max }) => (
+  const FormField = ({ name, label, type = "number", placeholder, step, min, max }: any) => (
     <div>
       <label className="block text-sm font-medium text-slate-700 mb-2">
         {label} {errors[name] && <span className="text-red-500 text-xs">*</span>}
@@ -203,7 +199,7 @@ const TransactionnelModal = ({ open, onClose, onSave }) => {
     </div>
   );
 
-  const fraudStatus = prediction ? getFraudStatus(prediction) : null;
+  const fraudStatus = getFraudStatus(prediction);
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -266,7 +262,7 @@ const TransactionnelModal = ({ open, onClose, onSave }) => {
                       <p className={`text-lg font-bold ${
                         fraudStatus.isFraud ? 'text-red-700' : 'text-green-700'
                       }`}>
-                        {(prediction.probability_fraud * 100).toFixed(1)}%
+                        {((prediction.probability_fraud || 0) * 100).toFixed(1)}%
                       </p>
                     </div>
                     <div>
@@ -285,7 +281,7 @@ const TransactionnelModal = ({ open, onClose, onSave }) => {
                   ? 'bg-red-100 text-red-800 border border-red-300' 
                   : 'bg-green-100 text-green-800 border border-green-300'
               }`}>
-                {prediction.risk_level}
+                {prediction.risk_level || 'FAIBLE'}
               </span>
             </div>
             

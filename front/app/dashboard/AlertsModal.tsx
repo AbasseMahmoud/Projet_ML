@@ -30,6 +30,11 @@ interface DataQuality {
   fetchedAt: string;
 }
 
+interface QualityValue {
+  count?: number;
+  [key: string]: any;
+}
+
 interface AlertsModalProps {
   open: boolean;
   onClose: () => void;
@@ -91,7 +96,6 @@ const AlertsModal: React.FC<AlertsModalProps> = ({
       if (qualityData.success) {
         setDataQuality(qualityData.data);
       } else {
-        
         await fetchIndividualQualityData();
       }
     } catch (err) {
@@ -104,7 +108,6 @@ const AlertsModal: React.FC<AlertsModalProps> = ({
 
   const fetchIndividualQualityData = async () => {
     try {
-      //  SUPPRIMÉ: valeurs-aberrantes - on garde seulement doublons et manquantes
       const [doublonsRes, manquantesRes] = await Promise.all([
         fetch('/api/doublons'),
         fetch('/api/valeurs-manquantes')
@@ -140,18 +143,27 @@ const AlertsModal: React.FC<AlertsModalProps> = ({
     return (
       <div className="space-y-3">
         {Object.entries(data).map(([key, value]) => {
-          //  CORRECTION: Gérer les différents types de données
+          // CORRECTION : Gestion sécurisée des types
           let displayValue: string;
           let count: number;
 
-          if (typeof value === 'object' && value !== null) {
-            // Pour les valeurs complexes
-            displayValue = value.count?.toString() || '0';
-            count = value.count || 0;
-          } else {
-            // Pour les valeurs simples
+          if (typeof value === 'object' && value !== null && 'count' in value) {
+            // Pour les objets avec propriété count
+            const qualityValue = value as QualityValue;
+            displayValue = qualityValue.count?.toString() || '0';
+            count = qualityValue.count || 0;
+          } else if (typeof value === 'number') {
+            // Pour les nombres directs
             displayValue = value.toString();
-            count = Number(value);
+            count = value;
+          } else if (typeof value === 'string') {
+            // Pour les strings
+            displayValue = value;
+            count = parseInt(value) || 0;
+          } else {
+            // Pour les autres types
+            displayValue = '0';
+            count = 0;
           }
 
           return (
@@ -182,24 +194,38 @@ const AlertsModal: React.FC<AlertsModalProps> = ({
         {/* En-tête avec onglets */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            {/* <h2 className="text-2xl font-bold text-slate-900">
-              {activeTab === 'Qualité des Données' ? 'Gestion des Alertes' : 
+            <h2 className="text-2xl font-bold text-slate-900">
+              {activeTab === 'data-quality' ? 'Qualité des Données' : 
                activeTab === 'models' ? 'Performance des Modèles IA' : 
-               'alerts'}
-            </h2> */}
+               'Gestion des Alertes'}
+            </h2>
           </div>
           
           <div className="flex items-center space-x-2 bg-slate-100 p-1 rounded-2xl">
-             <button onClick={() => setActiveTab('data-quality')} className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${activeTab === 'data-quality' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}>
-              Qualité Données
-            </button>
-            <button onClick={() => setActiveTab('alerts')} className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${activeTab === 'alerts' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}>
+            <button 
+              onClick={() => setActiveTab('alerts')} 
+              className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+                activeTab === 'alerts' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
               Alertes
             </button>
-            <button onClick={() => setActiveTab('models')} className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${activeTab === 'models' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}>
+            <button 
+              onClick={() => setActiveTab('models')} 
+              className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+                activeTab === 'models' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
               Modèles IA
             </button>
-           
+            <button 
+              onClick={() => setActiveTab('data-quality')} 
+              className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+                activeTab === 'data-quality' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Qualité Données
+            </button>
           </div>
 
           <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-xl">
@@ -257,14 +283,18 @@ const AlertsModal: React.FC<AlertsModalProps> = ({
             ))}
           </div>
         ) : (
-          /* ✅ MODIFIÉ: Onglet Qualité des Données - seulement doublons et manquantes */
+          /* Onglet Qualité des Données */
           <div className="space-y-6">
             <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200">
               <div>
                 <h3 className="font-semibold text-slate-900">Analyse de la Qualité des Données</h3>
                 <p className="text-sm text-slate-500">Doublons et valeurs manquantes</p>
               </div>
-              <button onClick={fetchAllDataQuality} disabled={loading} className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-medium">
+              <button 
+                onClick={fetchAllDataQuality} 
+                disabled={loading} 
+                className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-medium disabled:opacity-50"
+              >
                 {loading ? 'Chargement...' : 'Actualiser'}
               </button>
             </div>
@@ -283,17 +313,15 @@ const AlertsModal: React.FC<AlertsModalProps> = ({
               <div className="grid gap-6">
                 {/* Doublons */}
                 <div className="p-6 bg-white rounded-2xl border border-slate-200">
-                  <h4 className="text-lg font-bold text-slate-900 mb-4"> Doublons</h4>
+                  <h4 className="text-lg font-bold text-slate-900 mb-4">Doublons</h4>
                   {renderQualitySection('Doublons', dataQuality?.doublons || doublons, 'doublons')}
                 </div>
 
                 {/* Valeurs Manquantes */}
                 <div className="p-6 bg-white rounded-2xl border border-slate-200">
-                  <h4 className="text-lg font-bold text-slate-900 mb-4"> Valeurs Manquantes</h4>
+                  <h4 className="text-lg font-bold text-slate-900 mb-4">Valeurs Manquantes</h4>
                   {renderQualitySection('Valeurs Manquantes', dataQuality?.valeurs_manquantes || valeursManquantes, 'manquantes')}
                 </div>
-
-                {/* ✅ SUPPRIMÉ: Section Valeurs Aberrantes */}
               </div>
             )}
           </div>

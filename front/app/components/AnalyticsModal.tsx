@@ -1,5 +1,6 @@
 // components/AnalyticsModal.tsx
 import React, { useState, useEffect } from 'react';
+import { apiService } from '../services/apiService';
 
 interface OutlierData {
   count: number;
@@ -32,27 +33,53 @@ const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ open, onClose }) => {
   const [error, setError] = useState<string | null>(null);
 
   // Charger les données des valeurs aberrantes
-  const loadOutliersData = async () => {
-    setLoading(true);
-    setError(null);
+  // const loadOutliersData = async () => {
+  //   setLoading(true);
+  //   setError(null);
     
-    try {
-       const response = await fetch('http://localhost:5000/api/valeurs-aberrantes-comparaison');
-      const result = await response.json();
+  //   try {
+  //      const response = await fetch('http://localhost:5000/api/valeurs-aberrantes-comparaison');
+  //     const result = await response.json();
       
-      if (result.success) {
-        setData(result.data);
-      } else {
-        setError(result.error || 'Erreur lors du chargement des données');
-      }
-    } catch (err) {
-      setError('Erreur de connexion au serveur');
-      console.error('Erreur:', err);
-    } finally {
-      setLoading(false);
+  //     if (result.success) {
+  //       setData(result.data);
+  //     } else {
+  //       setError(result.error || 'Erreur lors du chargement des données');
+  //     }
+  //   } catch (err) {
+  //     setError('Erreur de connexion au serveur');
+  //     console.error('Erreur:', err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+const loadOutliersData = async () => {
+  setLoading(true);
+  setError(null);
+  
+  try {
+    console.log('🔄 Chargement des données des valeurs aberrantes...');
+    
+    // REMPLACÉ : Utilisation du service API
+    const result = await apiService.getValeursAberrantesComparaison();
+    console.log('✅ Données reçues:', result);
+    
+    if (result.success) {
+      setData(result.data);
+      console.log('📊 Données des valeurs aberrantes mises à jour');
+    } else {
+      const errorMsg = result.error || 'Erreur lors du chargement des données';
+      setError(errorMsg);
+      console.error('❌ Erreur API:', errorMsg);
     }
-  };
-
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : 'Erreur de connexion au serveur';
+    setError(errorMsg);
+    console.error('❌ Erreur de connexion:', err);
+  } finally {
+    setLoading(false);
+  }
+};
   useEffect(() => {
     if (open) {
       loadOutliersData();

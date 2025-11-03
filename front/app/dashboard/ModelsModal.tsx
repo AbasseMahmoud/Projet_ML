@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { apiService } from '../services/apiService';
 
 interface ModelMetric {
   Model: string;
@@ -28,52 +29,93 @@ const ModelsModal: React.FC<ModelsModalProps> = ({ open, onClose }) => {
     }
   }, [open]);
 
-  const fetchModelMetrics = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch('/api/analyse-metrics');
+  // const fetchModelMetrics = async () => {
+  //   setLoading(true);
+  //   setError(null);
+  //   try {
+  //     const response = await fetch('/api/analyse-metrics');
       
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des métriques');
-      }
       
-      const data = await response.json();
+  //     if (!response.ok) {
+  //       throw new Error('Erreur lors de la récupération des métriques');
+  //     }
       
-      let metricsArray: ModelMetric[] = [];
+  //     const data = await response.json();
       
-      if (Array.isArray(data)) {
-        metricsArray = data;
-      } else if (data.data && Array.isArray(data.data)) {
-        metricsArray = data.data;
-      } else if (data.success && Array.isArray(data.data)) {
-        metricsArray = data.data;
-      } else {
-        console.warn('Format de réponse inattendu, utilisation des données simulées');
-        metricsArray = getMockMetrics();
-      }
+  //     let metricsArray: ModelMetric[] = [];
       
-      if (metricsArray.length === 0) {
-        metricsArray = getMockMetrics();
-      }
+  //     if (Array.isArray(data)) {
+  //       metricsArray = data;
+  //     } else if (data.data && Array.isArray(data.data)) {
+  //       metricsArray = data.data;
+  //     } else if (data.success && Array.isArray(data.data)) {
+  //       metricsArray = data.data;
+  //     } else {
+  //       console.warn('Format de réponse inattendu, utilisation des données simulées');
+  //       metricsArray = getMockMetrics();
+  //     }
       
-      setModelMetrics(metricsArray);
-      if (metricsArray.length > 0) {
-        setActiveModel(metricsArray[0].Model);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur inconnue');
-      console.error('Erreur fetch metrics:', err);
+  //     if (metricsArray.length === 0) {
+  //       metricsArray = getMockMetrics();
+  //     }
       
-      setModelMetrics(getMockMetrics());
-      if (getMockMetrics().length > 0) {
-        setActiveModel(getMockMetrics()[0].Model);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     setModelMetrics(metricsArray);
+  //     if (metricsArray.length > 0) {
+  //       setActiveModel(metricsArray[0].Model);
+  //     }
+  //   } catch (err) {
+  //     setError(err instanceof Error ? err.message : 'Erreur inconnue');
+  //     console.error('Erreur fetch metrics:', err);
+      
+  //     setModelMetrics(getMockMetrics());
+  //     if (getMockMetrics().length > 0) {
+  //       setActiveModel(getMockMetrics()[0].Model);
+  //     }
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
+  const fetchModelMetrics = async () => {
+  setLoading(true);
+  setError(null);
+  try {
+    // REMPLACÉ : Utilisation du service API
+    const data = await apiService.getStats();
+    
+    let metricsArray: ModelMetric[] = [];
+    
+    if (Array.isArray(data)) {
+      metricsArray = data;
+    } else if (data.data && Array.isArray(data.data)) {
+      metricsArray = data.data;
+    } else if (data.success && Array.isArray(data.data)) {
+      metricsArray = data.data;
+    } else {
+      console.warn('Format de réponse inattendu, utilisation des données simulées');
+      metricsArray = getMockMetrics();
+    }
+    
+    if (metricsArray.length === 0) {
+      metricsArray = getMockMetrics();
+    }
+    
+    setModelMetrics(metricsArray);
+    if (metricsArray.length > 0) {
+      setActiveModel(metricsArray[0].Model);
+    }
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Erreur inconnue');
+    console.error('Erreur fetch metrics:', err);
+    
+    setModelMetrics(getMockMetrics());
+    if (getMockMetrics().length > 0) {
+      setActiveModel(getMockMetrics()[0].Model);
+    }
+  } finally {
+    setLoading(false);
+  }
+};
   // ⭐⭐ NOUVELLE FONCTION : Exportation des données en CSV ⭐⭐
   const exportModelData = () => {
     if (!modelMetrics.length) return;

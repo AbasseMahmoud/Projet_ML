@@ -4,7 +4,8 @@ export const API_CONFIG = {
   ENDPOINTS: {
     PREDICT: '/predict',
     STATS: '/model-stats',
-    HEALTH: '/'
+    HEALTH: '/',
+    MATRICES_CONFUSION: '/matrices-confusion',
   }
 };
 

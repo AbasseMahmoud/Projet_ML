@@ -40,6 +40,11 @@ class ApiService {
   async healthCheck() {
     return this.request(API_CONFIG.ENDPOINTS.HEALTH);
   }
+
+   async getConfusionMatrices() {
+     return this.request(API_CONFIG.ENDPOINTS.MATRICES_CONFUSION);
+}
 }
 
+ 
 export const apiService = new ApiService();

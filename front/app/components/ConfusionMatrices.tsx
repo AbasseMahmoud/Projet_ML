@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-
+import { apiService } from '../services/apiService';
 interface ConfusionMatrixData {
   model: string;
   matrix: number[][];
@@ -40,7 +40,8 @@ const ConfusionMatrices: React.FC<ConfusionMatricesProps> = ({ open, onClose }) 
     setError(null);
     try {
       //  URL de l'API Flask
-      const response = await fetch('http://localhost:5000/api/matrices-confusion');
+      // const response = await fetch('http://localhost:5000/api/matrices-confusion');
+      const response = await apiService.getConfusionMatrices();
       
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`);

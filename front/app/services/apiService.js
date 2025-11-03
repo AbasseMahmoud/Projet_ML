@@ -1,5 +1,4 @@
 // services/apiService.js
-// import { API_CONFIG } from '../lib/api';
 import { API_CONFIG, getApiUrl } from '../lib/api';
 
 class ApiService {
@@ -38,14 +37,41 @@ class ApiService {
     return this.request(API_CONFIG.ENDPOINTS.STATS);
   }
 
+  async getConfusionMatrices() {
+    return this.request(API_CONFIG.ENDPOINTS.MATRICES_CONFUSION);
+  }
+
+  async getDataDistribution() {
+    return this.request(API_CONFIG.ENDPOINTS.DATA_DISTRIBUTION);
+  }
+
+  async getDataQuality() {
+    return this.request(API_CONFIG.ENDPOINTS.DATA_QUALITY);
+  }
+
+  async getDoublons() {
+    return this.request(API_CONFIG.ENDPOINTS.DOUBLONS);
+  }
+
+  async getValeursAberrantes() {
+    return this.request(API_CONFIG.ENDPOINTS.VALEURS_ABERRANTES);
+  }
+
+  async getValeursManquantes() {
+    return this.request(API_CONFIG.ENDPOINTS.VALEURS_MANQUANTES);
+  }
+
+  async getNormalisationStats() {
+    return this.request(API_CONFIG.ENDPOINTS.NORMALISATION_STATS);
+  }
+
+  async getValeursAberrantesComparaison() {
+    return this.request(API_CONFIG.ENDPOINTS.VALEURS_ABERRANTES_COMPARAISON);
+  }
+
   async healthCheck() {
     return this.request(API_CONFIG.ENDPOINTS.HEALTH);
   }
-
-   async getConfusionMatrices() {
-     return this.request(API_CONFIG.ENDPOINTS.MATRICES_CONFUSION);
-}
 }
 
- 
 export const apiService = new ApiService();

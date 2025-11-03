@@ -35,49 +35,76 @@ const ConfusionMatrices: React.FC<ConfusionMatricesProps> = ({ open, onClose }) 
     }
   }, [open]);
 
-  const fetchMatrices = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      //  URL de l'API Flask
-      // const response = await fetch('http://localhost:5000/api/matrices-confusion');
-      const response = await apiService.getConfusionMatrices();
+  // const fetchMatrices = async () => {
+  //   setLoading(true);
+  //   setError(null);
+  //   try {
+  //     //  URL de l'API Flask
+  //     // const response = await fetch('http://localhost:5000/api/matrices-confusion');
+  //     const response = await apiService.getConfusionMatrices();
       
-      if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
-      }
+  //     if (!response.ok) {
+  //       throw new Error(`Erreur HTTP: ${response.status}`);
+  //     }
       
-      const result = await response.json();
+  //     const result = await response.json();
       
-      // CORRECTION : Vérifier la structure de la réponse
-      if (result.success && Array.isArray(result.data)) {
-        setMatrices(result.data);
-        if (result.data.length > 0) {
-          setSelectedModel(result.data[0].model);
-        }
-      } else if (Array.isArray(result)) {
-        // Si l'API retourne directement un tableau
-        setMatrices(result);
-        if (result.length > 0) {
-          setSelectedModel(result[0].model);
-        }
-      } else {
-        throw new Error('Format de réponse inattendu de l\'API');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur inconnue');
-      console.error('Erreur fetch matrices:', err);
-      // Données de secours
-      setMatrices(getFallbackMatrices());
-      if (getFallbackMatrices().length > 0) {
-        setSelectedModel(getFallbackMatrices()[0].model);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     // CORRECTION : Vérifier la structure de la réponse
+  //     if (result.success && Array.isArray(result.data)) {
+  //       setMatrices(result.data);
+  //       if (result.data.length > 0) {
+  //         setSelectedModel(result.data[0].model);
+  //       }
+  //     } else if (Array.isArray(result)) {
+  //       // Si l'API retourne directement un tableau
+  //       setMatrices(result);
+  //       if (result.length > 0) {
+  //         setSelectedModel(result[0].model);
+  //       }
+  //     } else {
+  //       throw new Error('Format de réponse inattendu de l\'API');
+  //     }
+  //   } catch (err) {
+  //     setError(err instanceof Error ? err.message : 'Erreur inconnue');
+  //     console.error('Erreur fetch matrices:', err);
+  //     // Données de secours
+  //     setMatrices(getFallbackMatrices());
+  //     if (getFallbackMatrices().length > 0) {
+  //       setSelectedModel(getFallbackMatrices()[0].model);
+  //     }
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  
+  const fetchMatrices = async () => {
+  setLoading(true);
+  setError(null);
+  try {
+    // CORRECTION : Le service retourne déjà les données JSON
+    const result = await apiService.getConfusionMatrices();
+    
+    // Vérifier la structure de la réponse
+    if (result.success && Array.isArray(result.data)) {
+      setMatrices(result.data);
+      if (result.data.length > 0) {
+        setSelectedModel(result.data[0].model);
+      }
+    } else {
+      throw new Error('Format de réponse inattendu');
+    }
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Erreur inconnue');
+    console.error('Erreur fetch matrices:', err);
+    // Données de secours
+    setMatrices(getFallbackMatrices());
+    if (getFallbackMatrices().length > 0) {
+      setSelectedModel(getFallbackMatrices()[0].model);
+    }
+  } finally {
+    setLoading(false);
+  }
+};
   const selectedMatrix = matrices && Array.isArray(matrices) 
     ? matrices.find(matrix => matrix.model === selectedModel)
     : null;

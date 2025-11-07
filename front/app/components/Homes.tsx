@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import React from 'react';
+import { motion } from 'framer-motion';
 
 import { apiService } from '../services/apiService';
 
@@ -22,64 +23,118 @@ const Home = () => {
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 md:py-32">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/5 via-purple-600/5 to-blue-600/5"></div>
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 rounded-full blur-3xl"></div>
+        <motion.div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl"
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+        ></motion.div>
+        <motion.div
+          className="absolute bottom-0 right-1/4 w-64 h-64 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 rounded-full blur-3xl"
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1.5, delay: 0.3, ease: "easeOut" }}
+        ></motion.div>
 
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-5xl mx-auto text-center">
-            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-800 px-4 py-2 rounded-full text-sm font-semibold mb-8 shadow-lg">
+            <motion.div
+              className="inline-flex items-center space-x-2 bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-800 px-4 py-2 rounded-full text-sm font-semibold mb-8 shadow-lg"
+              initial={{ y: -50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
               <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
               <span>IA de pointe pour la sécurité bancaire</span>
-            </div>
+            </motion.div>
 
-            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-8 leading-tight">
+            <motion.h1
+              className="text-5xl md:text-7xl font-bold text-gray-900 mb-8 leading-tight"
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+            >
               Détection de fraude bancaire par{' '}
               <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
                 Intelligence Artificielle
               </span>
-            </h1>
+            </motion.h1>
 
-            <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed">
+            <motion.p
+              className="text-xl md:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed"
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+            >
               Une solution innovante pour automatiser l'identification des clients frauduleux, permettant aux institutions financières de gagner du temps et de minimiser les risques de fraude.
-            </p>
+            </motion.p>
 
-            <div className="flex flex-col sm:flex-row justify-center gap-6 mb-16">
-              <Link
-                href="/dashboard"
-                className="group relative bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-10 py-4 rounded-2xl font-bold text-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-2xl hover:shadow-indigo-500/25 hover:scale-105 transform"
+            <motion.div
+              className="flex flex-col sm:flex-row justify-center gap-6 mb-16"
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.8 }}
+            >
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <span className="relative z-10">Démarrer l'analyse</span>
-                <div className="absolute inset-0 bg-white/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </Link>
+                <Link
+                  href="/dashboard"
+                  className="group relative bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-10 py-4 rounded-2xl font-bold text-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-2xl hover:shadow-indigo-500/25 hover:scale-105 transform"
+                >
+                  <span className="relative z-10">Démarrer l'analyse</span>
+                  <div className="absolute inset-0 bg-white/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </Link>
+              </motion.div>
 
-              <button
-                onClick={testApiConnection}
-                className="group relative bg-white text-indigo-600 border-2 border-indigo-600 px-10 py-4 rounded-2xl font-bold text-lg hover:bg-indigo-50 transition-all duration-300 shadow-xl hover:shadow-indigo-500/10 hover:scale-105 transform"
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <span className="flex items-center space-x-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span>Tester la connexion API</span>
-                </span>
-              </button>
-            </div>
+                <button
+                  onClick={testApiConnection}
+                  className="group relative bg-white text-indigo-600 border-2 border-indigo-600 px-10 py-4 rounded-2xl font-bold text-lg hover:bg-indigo-50 transition-all duration-300 shadow-xl hover:shadow-indigo-500/10 hover:scale-105 transform"
+                >
+                  <span className="flex items-center space-x-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Tester la connexion API</span>
+                  </span>
+                </button>
+              </motion.div>
+            </motion.div>
 
             {/* Trust indicators */}
-            <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-gray-500">
-              <div className="flex items-center space-x-2">
+            <motion.div
+              className="flex flex-wrap justify-center items-center gap-8 text-sm text-gray-500"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.8, delay: 1.0 }}
+            >
+              <motion.div
+                className="flex items-center space-x-2"
+                whileHover={{ scale: 1.1 }}
+              >
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <span>95% de précision</span>
-              </div>
-              <div className="flex items-center space-x-2">
+              </motion.div>
+              <motion.div
+                className="flex items-center space-x-2"
+                whileHover={{ scale: 1.1 }}
+              >
                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                 <span>Analyse en 2 secondes</span>
-              </div>
-              <div className="flex items-center space-x-2">
+              </motion.div>
+              <motion.div
+                className="flex items-center space-x-2"
+                whileHover={{ scale: 1.1 }}
+              >
                 <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                 <span>10K+ transactions analysées</span>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -101,7 +156,14 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="group text-center p-8 bg-gradient-to-br from-white to-slate-50 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 border border-slate-200/60">
+            <motion.div
+              className="group text-center p-8 bg-gradient-to-br from-white to-slate-50 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 border border-slate-200/60"
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              viewport={{ once: true }}
+              whileHover={{ y: -10 }}
+            >
               <div className="relative mb-8">
                 <div className="w-20 h-20 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-2xl flex items-center justify-center mx-auto shadow-lg group-hover:shadow-xl transition-shadow duration-300">
                   <svg className="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -116,9 +178,16 @@ const Home = () => {
               <p className="text-gray-600 text-lg leading-relaxed">
                 Détection proactive des transactions suspectes avec un taux de précision de 95%.
               </p>
-            </div>
+            </motion.div>
 
-            <div className="group text-center p-8 bg-gradient-to-br from-white to-slate-50 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 border border-slate-200/60">
+            <motion.div
+              className="group text-center p-8 bg-gradient-to-br from-white to-slate-50 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 border border-slate-200/60"
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+              whileHover={{ y: -10 }}
+            >
               <div className="relative mb-8">
                 <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center mx-auto shadow-lg group-hover:shadow-xl transition-shadow duration-300">
                   <svg className="w-10 h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -133,9 +202,16 @@ const Home = () => {
               <p className="text-gray-600 text-lg leading-relaxed">
                 Analyse instantanée des transactions avec résultats en moins de 2 secondes.
               </p>
-            </div>
+            </motion.div>
 
-            <div className="group text-center p-8 bg-gradient-to-br from-white to-slate-50 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 border border-slate-200/60">
+            <motion.div
+              className="group text-center p-8 bg-gradient-to-br from-white to-slate-50 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 border border-slate-200/60"
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              viewport={{ once: true }}
+              whileHover={{ y: -10 }}
+            >
               <div className="relative mb-8">
                 <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mx-auto shadow-lg group-hover:shadow-xl transition-shadow duration-300">
                   <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -150,7 +226,7 @@ const Home = () => {
               <p className="text-gray-600 text-lg leading-relaxed">
                 Tableaux de bord détaillés avec métriques de performance et tendances.
               </p>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>

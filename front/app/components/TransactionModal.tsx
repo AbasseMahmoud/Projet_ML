@@ -81,11 +81,14 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
       const modelData = mapToModelFeatures(transactionData);
       console.log('Données envoyées au modèle:', modelData);
       
-      const response = await axios.post('https://projet-ml-uxvm.onrender.com/predict', modelData, {
+      // const response = await axios.post('https://projet-ml-uxvm.onrender.com/predict', modelData, {
+      //   timeout: 10000,
+      //   headers: { 'Content-Type': 'application/json' }
+      // });
+      const response = await axios.post('https://projet-ml-uxvm.onrender.com/api/predict', modelData, {
         timeout: 10000,
         headers: { 'Content-Type': 'application/json' }
       });
-      
       if (response.data) {
         const predictionData: PredictionData = {
           prediction: response.data.prediction || (response.data.is_fraud ? 1 : 0),

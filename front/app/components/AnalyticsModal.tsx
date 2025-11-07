@@ -2,6 +2,31 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../services/apiService';
 
+// Icon components for statistics cards
+const TrendingUpIcon = () => (
+  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+  </svg>
+);
+
+const TrendingDownIcon = () => (
+  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+  </svg>
+);
+
+const BarChartIcon = () => (
+  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+  </svg>
+);
+
+const PercentIcon = () => (
+  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+  </svg>
+);
+
 interface OutlierData {
   count: number;
   borne_inf: number;
@@ -110,20 +135,37 @@ const loadOutliersData = async () => {
         {/* Content */}
         <div className="p-8 overflow-auto max-h-[calc(90vh-140px)]">
           {loading && (
-            <div className="flex justify-center items-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+            <div className="flex flex-col justify-center items-center py-16">
+              <div className="relative">
+                <div className="animate-spin rounded-full h-16 w-16 border-4 border-indigo-200 border-t-indigo-500"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-purple-500 animate-spin animation-delay-75"></div>
+              </div>
+              <div className="mt-6 text-center">
+                <div className="text-lg font-semibold text-slate-700 mb-2">Chargement des analytiques...</div>
+                <div className="text-sm text-slate-500">Analyse des valeurs aberrantes en cours</div>
+              </div>
             </div>
           )}
 
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center">
-              <div className="text-red-600 text-lg font-semibold mb-2">Erreur</div>
-              <div className="text-red-500">{error}</div>
+            <div className="bg-gradient-to-br from-red-50 via-red-100 to-pink-50 border-2 border-red-200/60 rounded-3xl p-8 text-center shadow-lg">
+              <div className="flex justify-center mb-4">
+                <div className="p-4 bg-red-500/10 rounded-full">
+                  <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+              </div>
+              <div className="text-red-700 text-xl font-bold mb-3">Erreur de chargement</div>
+              <div className="text-red-600 mb-6 max-w-md mx-auto">{error}</div>
               <button
                 onClick={loadOutliersData}
-                className="mt-4 px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors duration-200"
+                className="inline-flex items-center space-x-2 px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-2xl font-semibold transition-all duration-300 hover:shadow-lg hover:scale-105"
               >
-                Réessayer
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span>Réessayer</span>
               </button>
             </div>
           )}
@@ -132,70 +174,99 @@ const loadOutliersData = async () => {
             <div className="space-y-8">
               {/* Statistiques Globales */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl p-6 border border-red-200/60">
-                  <div className="text-3xl font-bold text-red-600 mb-2">{data.statistiques.total_avant}</div>
+                <div className="group bg-gradient-to-br from-red-50 via-red-100 to-orange-100 rounded-3xl p-6 border border-red-200/60 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 bg-red-500/10 rounded-2xl">
+                      <TrendingUpIcon />
+                    </div>
+                    <div className="text-red-400 text-sm font-semibold">AVANT</div>
+                  </div>
+                  <div className="text-4xl font-bold text-red-600 mb-2 group-hover:scale-110 transition-transform duration-300">{data.statistiques.total_avant}</div>
                   <div className="text-sm text-red-500 font-medium">Valeurs aberrantes avant</div>
                 </div>
-                
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200/60">
-                  <div className="text-3xl font-bold text-green-600 mb-2">{data.statistiques.total_apres}</div>
+
+                <div className="group bg-gradient-to-br from-green-50 via-emerald-100 to-teal-100 rounded-3xl p-6 border border-green-200/60 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 bg-green-500/10 rounded-2xl">
+                      <TrendingDownIcon />
+                    </div>
+                    <div className="text-green-400 text-sm font-semibold">APRÈS</div>
+                  </div>
+                  <div className="text-4xl font-bold text-green-600 mb-2 group-hover:scale-110 transition-transform duration-300">{data.statistiques.total_apres}</div>
                   <div className="text-sm text-green-500 font-medium">Valeurs aberrantes après</div>
                 </div>
-                
-                <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-200/60">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">{data.statistiques.reduction}</div>
+
+                <div className="group bg-gradient-to-br from-blue-50 via-cyan-100 to-indigo-100 rounded-3xl p-6 border border-blue-200/60 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 bg-blue-500/10 rounded-2xl">
+                      <BarChartIcon />
+                    </div>
+                    <div className="text-blue-400 text-sm font-semibold">RÉDUCTION</div>
+                  </div>
+                  <div className="text-4xl font-bold text-blue-600 mb-2 group-hover:scale-110 transition-transform duration-300">{data.statistiques.reduction}</div>
                   <div className="text-sm text-blue-500 font-medium">Réduction</div>
                 </div>
-                
-                <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-6 border border-purple-200/60">
-                  <div className="text-3xl font-bold text-purple-600 mb-2">{data.statistiques.pourcentage_reduction}%</div>
+
+                <div className="group bg-gradient-to-br from-purple-50 via-violet-100 to-indigo-100 rounded-3xl p-6 border border-purple-200/60 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 bg-purple-500/10 rounded-2xl">
+                      <PercentIcon />
+                    </div>
+                    <div className="text-purple-400 text-sm font-semibold">AMÉLIORATION</div>
+                  </div>
+                  <div className="text-4xl font-bold text-purple-600 mb-2 group-hover:scale-110 transition-transform duration-300">{data.statistiques.pourcentage_reduction}%</div>
                   <div className="text-sm text-purple-500 font-medium">Amélioration</div>
                 </div>
               </div>
 
               {/* Tableau de Comparaison */}
-              <div className="bg-slate-50 rounded-2xl p-6">
-                <h3 className="text-xl font-bold text-slate-900 mb-6">Détail par Colonne</h3>
+              <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-3xl p-8 shadow-lg border border-slate-200/60">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-2xl font-bold text-slate-900">Détail par Colonne</h3>
+                  <div className="flex items-center space-x-2 text-sm text-slate-500">
+                    <div className="w-3 h-3 bg-slate-300 rounded-full"></div>
+                    <span>Comparaison détaillée</span>
+                  </div>
+                </div>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-slate-200/60">
-                        <th className="text-left pb-4 font-semibold text-slate-900">Colonne</th>
-                        <th className="text-center pb-4 font-semibold text-slate-900">Avant Correction</th>
-                        <th className="text-center pb-4 font-semibold text-slate-900">Après Correction</th>
-                        {/* <th className="text-center pb-4 font-semibold text-slate-900">Bornes Acceptables</th> */}
-                        <th className="text-center pb-4 font-semibold text-slate-900">Amélioration</th>
+                      <tr className="border-b-2 border-slate-300/60">
+                        <th className="text-left pb-6 font-bold text-slate-900 text-lg">Colonne</th>
+                        <th className="text-center pb-6 font-bold text-slate-900 text-lg">Avant Correction</th>
+                        <th className="text-center pb-6 font-bold text-slate-900 text-lg">Après Correction</th>
+                        <th className="text-center pb-6 font-bold text-slate-900 text-lg">Amélioration</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200/60">
-                      {Object.entries(data.avant).map(([colonne, donneesAvant]) => {
+                    <tbody className="divide-y divide-slate-200/40">
+                      {Object.entries(data.avant).map(([colonne, donneesAvant], index) => {
                         const donneesApres = data.apres[colonne];
                         const amelioration = donneesAvant.count - (donneesApres?.count || 0);
-                        
+
                         return (
-                          <tr key={colonne} className="hover:bg-white/50 transition-colors duration-200">
-                            <td className="py-4 font-medium text-slate-900">{colonne}</td>
-                            <td className="py-4 text-center">
-                              <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
-                                {donneesAvant.count} valeurs
-                              </span>
+                          <tr key={colonne} className={`hover:bg-white/60 transition-all duration-300 hover:shadow-sm ${index % 2 === 0 ? 'bg-white/20' : 'bg-slate-50/40'}`}>
+                            <td className="py-6 font-semibold text-slate-900 text-lg">{colonne}</td>
+                            <td className="py-6 text-center">
+                              <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-100 to-red-200 text-red-800 rounded-full font-semibold shadow-sm border border-red-300/50">
+                                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                                <span>{donneesAvant.count} valeurs</span>
+                              </div>
                             </td>
-                            <td className="py-4 text-center">
-                              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                                {donneesApres?.count || 0} valeurs
-                              </span>
+                            <td className="py-6 text-center">
+                              <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-100 to-green-200 text-green-800 rounded-full font-semibold shadow-sm border border-green-300/50">
+                                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                <span>{donneesApres?.count || 0} valeurs</span>
+                              </div>
                             </td>
-                            {/* <td className="py-4 text-center text-sm text-slate-600">
-                              [{donneesAvant.borne_inf.toFixed(2)}, {donneesAvant.borne_sup.toFixed(2)}]
-                            </td> */}
-                            <td className="py-4 text-center">
-                              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                amelioration > 0 
-                                  ? 'bg-blue-100 text-blue-700' 
-                                  : 'bg-slate-100 text-slate-500'
+                            <td className="py-6 text-center">
+                              <div className={`inline-flex items-center space-x-2 px-4 py-2 rounded-full font-semibold shadow-sm border ${
+                                amelioration > 0
+                                  ? 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border-blue-300/50'
+                                  : 'bg-gradient-to-r from-slate-100 to-slate-200 text-slate-600 border-slate-300/50'
                               }`}>
-                                {amelioration > 0 ? `-${amelioration}` : '0'}
-                              </span>
+                                {amelioration > 0 && <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>}
+                                <span>{amelioration > 0 ? `-${amelioration}` : '0'}</span>
+                              </div>
                             </td>
                           </tr>
                         );
@@ -206,18 +277,24 @@ const loadOutliersData = async () => {
               </div>
 
               {/* Actions */}
-              <div className="flex justify-end space-x-4 pt-4">
+              <div className="flex justify-end space-x-4 pt-6">
                 <button
                   onClick={onClose}
-                  className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition-colors duration-200"
+                  className="inline-flex items-center space-x-2 px-8 py-3 bg-gradient-to-r from-slate-100 to-slate-200 hover:from-slate-200 hover:to-slate-300 text-slate-700 rounded-2xl font-semibold transition-all duration-300 hover:shadow-lg hover:scale-105"
                 >
-                  Fermer
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  <span>Fermer</span>
                 </button>
                 <button
                   onClick={loadOutliersData}
-                  className="px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-medium transition-colors duration-200"
+                  className="inline-flex items-center space-x-2 px-8 py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white rounded-2xl font-semibold transition-all duration-300 hover:shadow-lg hover:scale-105"
                 >
-                  Actualiser les Données
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <span>Actualiser les Données</span>
                 </button>
               </div>
             </div>

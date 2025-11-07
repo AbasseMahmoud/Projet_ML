@@ -106,38 +106,110 @@ const DataDistribution: React.FC<DataDistributionProps> = ({ open, onClose }) =>
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-3xl p-8 max-w-4xl w-full mx-auto max-h-[90vh] overflow-y-auto">
-        {/* En-tête */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900">Distribution des Données</h2>
-            <p className="text-slate-500">
-              Analyse dynamique du déséquilibre des classes 
-            </p>
-            {distribution?.source === 'flask_dynamic' && (
-              <p className="text-sm text-green-600 font-medium">
-                ✓ Données calculées dynamiquement 
-              </p>
-            )}
+        {/* En-tête avec statistiques générales */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-3xl p-6 border border-blue-100 mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">Distribution des Données</h2>
+              <p className="text-slate-600">Analyse dynamique du déséquilibre des classes</p>
+              {distribution?.source === 'flask_dynamic' && (
+                <p className="text-sm text-green-600 font-medium">
+                  ✓ Données calculées dynamiquement
+                </p>
+              )}
+            </div>
+            <div className="flex items-center space-x-4">
+              {/* Bouton de recalcul */}
+              <button
+                onClick={fetchDistribution}
+                disabled={loading}
+                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 disabled:from-blue-300 disabled:to-indigo-300 text-white rounded-xl font-medium disabled:opacity-50 shadow-lg shadow-blue-500/25 transition-all duration-200 flex items-center space-x-2"
+              >
+                {loading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Calcul en cours...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span>Recalculer</span>
+                  </div>
+                )}
+              </button>
+
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-slate-100 rounded-xl transition-colors duration-200"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           </div>
-          
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={fetchDistribution}
-              disabled={loading}
-              className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 disabled:bg-indigo-300 text-white rounded-xl font-medium transition-colors duration-200"
-            >
-              {loading ? 'Calcul en cours...' : 'Recalculer'}
-            </button>
-            
-            <button 
-              onClick={onClose}
-              className="p-2 hover:bg-slate-100 rounded-xl transition-colors duration-200"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
+
+          {/* Statistiques générales de la distribution */}
+          {distribution && !distribution.error && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-white/50">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-600">Total avant SMOTE</p>
+                    <p className="text-lg font-bold text-slate-900">{distribution.total_before.toLocaleString()}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-white/50">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-600">Total après SMOTE</p>
+                    <p className="text-lg font-bold text-slate-900">{distribution.total_after.toLocaleString()}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-white/50">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <svg className="h-5 w-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-600">Échantillons générés</p>
+                    <p className="text-lg font-bold text-slate-900">
+                      {(distribution.after_smote.fraud - distribution.before_smote.fraud).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-white/50">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <svg className="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-600">Dernière analyse</p>
+                    <p className="text-sm font-bold text-slate-900">{new Date().toLocaleString('fr-FR')}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {error && (

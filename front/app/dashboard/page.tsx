@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import TransactionnelModal from '../components/TransactionModal';
 import AlertsModal from './AlertsModal';
-import ModelsModal from './ModelsModal';
+// import ModelsModal from './ModelsModal';
 import ConfusionMatrices from '../components/ConfusionMatrices';
 import DataDistribution from '../components/DataDistribution';
 import AnalyticsModal from '../components/AnalyticsModal';
@@ -12,43 +12,14 @@ import NormalisationStatsModal from '../components/NormalisationStats';
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-   
-  const [isTransactionsModalOpen, setIsTransactionsModalOpen] = useState(false); 
+
+  const [isTransactionsModalOpen, setIsTransactionsModalOpen] = useState(false);
   const [isAlertsModalOpen, setIsAlertsModalOpen] = useState(false);
   const [isModelsModalOpen, setIsModelsModalOpen] = useState(false);
-  const [isConfusionMatricesOpen, setIsConfusionMatricesOpen] = useState(false); // Ajoutez cet état
+  const [isConfusionMatricesOpen, setIsConfusionMatricesOpen] = useState(false);
   const [isDataDistributionOpen, setIsDataDistributionOpen] = useState(false);
   const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
   const [isNormalisationStatsOpen, setIsNormalisationStatsOpen] = useState(false);
-  // Données simulées
-  const statsData = {
-    totalTransactions: 12543,
-    fraudDetected: 89,
-    accuracyRate: 98.7,
-    falsePositives: 23,
-    savings: 245000
-  };
-
-  const recentAlerts = [
-    { id: 1, transaction: 'TRX-7845', amount: '€2,450.00', status: 'Fraude suspectée', time: '2 min', priority: 'high' as const, user: 'Jean D.' },
-    { id: 2, transaction: 'TRX-7844', amount: '€150.00', status: 'Analyse en cours', time: '5 min', priority: 'medium' as const, user: 'Marie L.' },
-    { id: 3, transaction: 'TRX-7842', amount: '€890.00', status: 'Approuvé', time: '10 min', priority: 'low' as const, user: 'Pierre M.' },
-    { id: 4, transaction: 'TRX-7840', amount: '€1,250.00', status: 'Fraude confirmée', time: '15 min', priority: 'high' as const, user: 'Sophie T.' }
-  ];
-
-  const modelPerformance = [
-    { metric: 'Accuracy', value: 98.7, target: 97.5, color: 'bg-gradient-to-r from-green-400 to-emerald-500' },
-    { metric: 'Precision', value: 95.2, target: 94.0, color: 'bg-gradient-to-r from-blue-400 to-cyan-500' },
-    { metric: 'Recall', value: 92.8, target: 91.0, color: 'bg-gradient-to-r from-purple-400 to-indigo-500' },
-    { metric: 'F1-Score', value: 94.0, target: 92.5, color: 'bg-gradient-to-r from-orange-400 to-red-500' }
-  ];
-
-  // Gestionnaire d'actions pour les alertes
-  const handleAlertAction = (alertId: number, action: string) => {
-    console.log(`Action "${action}" sur l'alerte ${alertId}`);
-    // Ici vous pouvez ajouter la logique pour traiter l'alerte
-    // Par exemple, appeler une API, mettre à jour l'état, etc.
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 flex">
@@ -70,11 +41,11 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Navigation */}
         <nav className="flex-1 mt-8 px-4">
           {[
-           
+
             // { 
             //   id: 'normalisation',  
             //   name: 'Normalisation', 
@@ -91,7 +62,7 @@ const Dashboard = () => {
             },
             { 
               id: 'alerts', 
-              name: 'Valeurs', 
+              name: 'Modeles IA et Valeurs', 
               icon: '🚨', 
               badge: '3',
               onClick: () => setIsAlertsModalOpen(true)
@@ -104,13 +75,13 @@ const Dashboard = () => {
               onClick: () => setIsAnalyticsModalOpen(true) 
             },
             
-            { 
-              id: 'models', 
-              name: 'Modèles IA', 
-              icon: '🤖', 
-              badge: 'New',
-              onClick: () => setIsModelsModalOpen(true)
-            },
+            // { 
+            //   id: 'models', 
+            //   name: 'Modèles IA', 
+            //   icon: '🤖', 
+            //   badge: 'New',
+            //   onClick: () => setIsModelsModalOpen(true)
+            // },
             { 
               id: 'confusion-matrices', 
               name: 'Matrices Confusion', 
@@ -243,8 +214,8 @@ const Dashboard = () => {
                 { icon: '⚙️', title: 'Paramètres', desc: 'Configurer le système' },
                 { icon: '📊', title: 'Distribution Données', desc: 'Analyser le déséquilibre des classes' }
               ].map((action, index) => (
-                <button 
-                  key={index} 
+                <button
+                  key={index}
                   className="group p-6 bg-slate-50 hover:bg-gradient-to-br hover:from-indigo-50 hover:to-purple-50 rounded-2xl border border-slate-200/60 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-300 text-left"
                   onClick={() => {
                     if (action.title === 'Entraîner Modèle') {
@@ -285,18 +256,16 @@ const Dashboard = () => {
       />
 
       {/* Modal des Alertes */}
-      <AlertsModal 
+      <AlertsModal
         open={isAlertsModalOpen}
         onClose={() => setIsAlertsModalOpen(false)}
-        alerts={recentAlerts}
-        onAlertAction={handleAlertAction}
       />
 
       {/* Modal des Modèles IA */}
-      <ModelsModal 
+      {/* <ModelsModal 
         open={isModelsModalOpen}
         onClose={() => setIsModelsModalOpen(false)}
-      />
+      /> */}
 
       {/* Modal des Matrices de Confusion */}
       <ConfusionMatrices 

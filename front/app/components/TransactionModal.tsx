@@ -286,8 +286,8 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
             <h2 className="text-2xl font-bold text-slate-900">Formulaire de detection des fraudes</h2>
             <p className="text-slate-500">Détection de fraude en temps réel</p>
           </div>
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             className="p-2 hover:bg-slate-100 rounded-xl transition-colors duration-200"
             type="button"
           >

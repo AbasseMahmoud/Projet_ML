@@ -116,7 +116,7 @@ const ModelsModal: React.FC<ModelsModalProps> = ({ open, onClose }) => {
     setLoading(false);
   }
 };
-  // ⭐⭐ NOUVELLE FONCTION : Exportation des données en CSV ⭐⭐
+  //  NOUVELLE FONCTION : Exportation des données en CSV 
   const exportModelData = () => {
     if (!modelMetrics.length) return;
 
@@ -157,7 +157,7 @@ const ModelsModal: React.FC<ModelsModalProps> = ({ open, onClose }) => {
     }
   };
 
-  // ⭐⭐ FONCTION OPTIONNELLE : Export d'un modèle spécifique ⭐⭐
+  //  FONCTION OPTIONNELLE : Export d'un modèle spécifique 
   const exportSingleModel = (model: ModelMetric) => {
     try {
       const headers = ['Model', 'Accuracy', 'Precision', 'Recall', 'F1-score', 'Commentaire'];

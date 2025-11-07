@@ -10,10 +10,10 @@ interface TransactionModalProps {
 // Interface pour la prédiction
 interface PredictionData {
   prediction: number;
-  probability_fraud?: number;
-  probability?: number;
-  risk_level?: string;
-  is_fraud?: boolean;
+  probability_fraud: number;
+  probability_legit?: number;
+  risk_level: string;
+  confidence?: number;
 }
 
 const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, onSave }) => {
@@ -22,6 +22,16 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
   const [errors, setErrors] = useState<Record<string, string>>({});
   
   if (!open) return null;
+
+  // Fonction pour convertir les niveaux de risque en français
+  const mapRiskLevel = (level: string): string => {
+    const levelMap: { [key: string]: string } = {
+      'LOW': 'FAIBLE',
+      'MEDIUM': 'MOYEN', 
+      'HIGH': 'ÉLEVÉ'
+    };
+    return levelMap[level] || level;
+  };
 
   // Fonction de validation des champs
   const validateForm = (formData: FormData): Record<string, string> => {
@@ -81,24 +91,24 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
       const modelData = mapToModelFeatures(transactionData);
       console.log('Données envoyées au modèle:', modelData);
       
-      // const response = await axios.post('https://projet-ml-uxvm.onrender.com/predict', modelData, {
-      //   timeout: 10000,
-      //   headers: { 'Content-Type': 'application/json' }
-      // });
       const response = await axios.post('https://projet-ml-uxvm.onrender.com/api/predict', modelData, {
         timeout: 10000,
         headers: { 'Content-Type': 'application/json' }
       });
-      if (response.data) {
+      
+      if (response.data && response.data.success) {
+        // ✅ Adaptation à la structure réelle du backend
         const predictionData: PredictionData = {
-          prediction: response.data.prediction || (response.data.is_fraud ? 1 : 0),
-          probability_fraud: response.data.probability_fraud || response.data.probability || 0,
-          risk_level: response.data.risk_level || 'FAIBLE'
+          prediction: response.data.prediction,
+          probability_fraud: response.data.probability_fraud,
+          probability_legit: response.data.probability_legit,
+          risk_level: mapRiskLevel(response.data.risk_level),
+          confidence: response.data.confidence
         };
         setPrediction(predictionData);
         return predictionData;
       } else {
-        throw new Error('Erreur de prédiction');
+        throw new Error('Erreur de prédiction: ' + (response.data?.error || 'Unknown error'));
       }
     } catch (error) {
       console.error('Erreur API:', error);
@@ -162,6 +172,10 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
       onSave(transactionWithPrediction);
     } catch (error) {
       console.error('Erreur lors de l\'analyse:', error);
+      // Afficher un message d'erreur à l'utilisateur
+      setErrors({ 
+        global: 'Erreur lors de l\'analyse de la transaction. Veuillez réessayer.' 
+      });
     }
   };
 
@@ -229,7 +243,9 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
             <div className="flex items-center space-x-2 text-red-700">
               <span>⚠️</span>
-              <p className="font-medium">Veuillez corriger les erreurs ci-dessous avant de continuer</p>
+              <p className="font-medium">
+                {errors.global || 'Veuillez corriger les erreurs ci-dessous avant de continuer'}
+              </p>
             </div>
           </div>
         )}
@@ -277,6 +293,20 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
                       </p>
                     </div>
                   </div>
+                  <div className="grid grid-cols-2 gap-4 mt-3">
+                    <div>
+                      <p className="text-sm text-slate-600">Confiance</p>
+                      <p className="text-lg font-bold text-blue-700">
+                        {((prediction.confidence || 0) * 100).toFixed(1)}%
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-slate-600">Niveau de risque</p>
+                      <p className="text-lg font-bold text-orange-700">
+                        {prediction.risk_level}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
               <span className={`px-4 py-2 rounded-full text-sm font-bold ${
@@ -284,7 +314,7 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
                   ? 'bg-red-100 text-red-800 border border-red-300' 
                   : 'bg-green-100 text-green-800 border border-green-300'
               }`}>
-                {prediction.risk_level || 'FAIBLE'}
+                {prediction.risk_level}
               </span>
             </div>
             

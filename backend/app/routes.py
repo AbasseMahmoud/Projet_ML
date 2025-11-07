@@ -16,6 +16,12 @@ from Model.Entrainement import (
 )
 bp = Blueprint('main', __name__, url_prefix='/api')
 
+# 👇 Ajoutez cette route OPTIONS spécifique pour /predict
+@bp.route('/predict', methods=['OPTIONS'])
+def options_predict():
+    return jsonify({'status': 'ok'}), 200
+
+
 @bp.route('/hello', methods=['GET'])
 def hello():
     return jsonify({"message": "Bonjour depuis Flask "})

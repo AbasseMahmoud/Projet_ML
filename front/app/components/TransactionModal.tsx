@@ -92,7 +92,7 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
       console.log('Données envoyées au modèle:', modelData);
       
       const response = await axios.post('https://projet-ml-uxvm.onrender.com/api/predict', modelData, {
-        timeout: 10000,
+        timeout:  30000,
         headers: { 'Content-Type': 'application/json' }
       });
       

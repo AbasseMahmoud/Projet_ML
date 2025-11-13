@@ -1,21 +1,30 @@
+# Build essentials
+pip>=25.2
+setuptools>=70.0.0
+wheel>=0.43.0
+
+# Flask & Web
 Flask==2.3.3
 flask-cors==4.0.0
 Flask-Migrate==4.0.5
 Flask-SQLAlchemy==3.0.5
 gunicorn==21.2.0
 
-# VERSIONS 100% STABLES :
-pandas==1.5.3
-scikit-learn==1.2.2
-numpy==1.24.3
-scipy==1.10.1
-
+# Data Science & ML (versions compatibles Python 3.11)
+pandas>=2.0.3
+scikit-learn>=1.5.2
+numpy>=2.0.0
+scipy>=1.11.0
 seaborn==0.12.2
-matplotlib==3.7.1
-imbalanced-learn==0.10.1
-joblib==1.2.0
+matplotlib==3.7.2
+imbalanced-learn>=0.13.0
+joblib==1.3.2
+threadpoolctl==3.2.0
 
-# Le reste reste identique
+# CORRECTION CRITIQUE : Greenlet compatible
+greenlet>=3.0.0
+
+# Autres dépendances (versions stables)
 alembic==1.12.1
 blinker==1.6.2
 click==8.1.7
@@ -28,4 +37,3 @@ python-dotenv==1.0.0
 SQLAlchemy==2.0.23
 typing_extensions==4.8.0
 Werkzeug==2.3.7
-greenlet==2.0.2

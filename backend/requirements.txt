@@ -21,6 +21,11 @@ imbalanced-learn>=0.13.0
 joblib==1.3.2
 threadpoolctl==3.2.0
 
+
+# SQLAlchemy compatible Python 3.13
+SQLAlchemy==2.0.23
+alembic==1.12.1
+greenlet==3.0.1  # Version CRITIQUE
 # CORRECTION CRITIQUE : Greenlet compatible
 greenlet>=3.0.0
 

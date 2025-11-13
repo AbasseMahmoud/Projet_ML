@@ -118,7 +118,7 @@ const Home = () => {
                 whileHover={{ scale: 1.1 }}
               >
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span>95% de précision</span>
+                <span>61.3% de précision</span>
               </motion.div>
               <motion.div
                 className="flex items-center space-x-2"
@@ -176,7 +176,7 @@ const Home = () => {
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Sécurité Renforcée</h3>
               <p className="text-gray-600 text-lg leading-relaxed">
-                Détection proactive des transactions suspectes avec un taux de précision de 95%.
+                Détection proactive des transactions suspectes avec un taux de précision de 61.3%.
               </p>
             </motion.div>
 
@@ -298,7 +298,7 @@ const Home = () => {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="group text-center p-8 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-3xl hover:shadow-xl transition-all duration-300 hover:scale-105 border border-indigo-200/50">
-              <div className="text-5xl font-bold text-indigo-600 mb-4 group-hover:scale-110 transition-transform duration-300">95%</div>
+              <div className="text-5xl font-bold text-indigo-600 mb-4 group-hover:scale-110 transition-transform duration-300">61.3%</div>
               <div className="text-gray-700 font-semibold text-lg">Précision</div>
               <div className="text-gray-500 text-sm mt-2">Taux de détection</div>
             </div>
@@ -334,7 +334,7 @@ const Home = () => {
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-6">
               <Link
-                href="/predict"
+                href="/dashboard"
                 className="group relative bg-white text-indigo-600 px-10 py-4 rounded-2xl font-bold text-lg hover:bg-gray-100 transition-all duration-300 shadow-xl hover:shadow-white/20 hover:scale-105 transform"
               >
                 <span className="flex items-center space-x-2">

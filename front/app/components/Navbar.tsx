@@ -19,10 +19,10 @@ const Navbar = () => {
                             </div>
                             <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
                         </div>
-                        <div>
+                        <Link href="/">
                             <span className="text-2xl font-bold text-white tracking-tight">FraudDetect</span>
                             <div className="text-xs text-indigo-100 font-medium">AI-Powered Security</div>
-                        </div>
+                        </Link>
                     </div>
 
                     {/* Desktop Navigation */}

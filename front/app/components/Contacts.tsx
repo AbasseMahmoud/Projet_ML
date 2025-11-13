@@ -186,8 +186,8 @@ const Contacts = () => {
                       </div>
                       <div>
                         <h4 className="font-semibold text-gray-900 mb-1">Email</h4>
-                        <p className="text-gray-600">support@frauddetect.com</p>
-                        <p className="text-gray-600">contact@frauddetect.com</p>
+                        <p className="text-gray-600">supportfrauddetect@gmail.com</p>
+                        <p className="text-gray-600">contactfrauddetect@gmail.com</p>
                       </div>
                     </div>
 
@@ -200,7 +200,7 @@ const Contacts = () => {
                       <div>
                         <h4 className="font-semibold text-gray-900 mb-1">Téléphone</h4>
                         <p className="text-gray-600">+221 78 145 49 10</p>
-                        <p className="text-gray-600">+221 77 123 45 67</p>
+                        <p className="text-gray-600">+221 77 649 13 45 </p>
                       </div>
                     </div>
 

@@ -5,7 +5,7 @@ Flask-Migrate==4.0.5
 Flask-SQLAlchemy==3.0.5
 gunicorn==21.2.0
 
-# Data Science - versions STABLES pour Python 3.11
+# Data Science - versions compatibles Python 3.11
 pandas==1.5.3
 scikit-learn==1.2.2
 numpy==1.24.3
@@ -19,7 +19,7 @@ threadpoolctl==3.1.0
 # Base de données
 SQLAlchemy==2.0.23
 alembic==1.12.1
-greenlet==2.0.2  # ✅ Version STABLE
+greenlet==2.0.2
 
 # Autres dépendances
 blinker==1.6.2

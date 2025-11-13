@@ -1,5 +1,8 @@
 from flask import Blueprint, jsonify
 import pandas as pd 
+from flask import Blueprint, request, jsonify
+from app.models import User
+from app import db
 from Model.Entrainement import (
     train_model,
     verifier_valeurs_manquantes,
@@ -16,6 +19,35 @@ from Model.Entrainement import (
 )
 bp = Blueprint('main', __name__, url_prefix='/api')
 
+
+
+@bp.route('/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    if not data or not data.get('username') or not data.get('password'):
+        return jsonify({'message': 'Champs manquants'}), 400
+
+    if User.query.filter_by(username=data['username']).first():
+        return jsonify({'message': 'Nom d’utilisateur déjà utilisé'}), 400
+
+    user = User(username=data['username'])
+    user.set_password(data['password'])  # Utilise la méthode set_password pour hasher
+    db.session.add(user)
+    db.session.commit()
+
+    return jsonify({'message': 'Utilisateur enregistré avec succès !'}), 201
+
+@bp.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    if not data or not data.get('username') or not data.get('password'):
+        return jsonify({'message': 'Champs manquants'}), 400
+
+    user = User.query.filter_by(username=data['username']).first()
+    if user and user.check_password(data['password']):
+        return jsonify({'message': 'Connexion réussie'}), 200
+
+    return jsonify({'message': 'Identifiants invalides'}), 401
 # 👇 Ajoutez cette route OPTIONS spécifique pour /predict
 @bp.route('/predict', methods=['OPTIONS'])
 def options_predict():

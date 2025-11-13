@@ -1,12 +1,35 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 import os
+from flask_sqlalchemy import SQLAlchemy
+
+# Initialiser SQLAlchemy (en dehors de create_app)
+db = SQLAlchemy()
 
 def create_app():
     app = Flask(__name__)
 
+    # Config PostgreSQL (Render) ou fallback local
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
+        'DATABASE_URL',
+        'postgresql://machine_learning_db_user:YYDiI7DBB4d3LOQsyJYXm7LET9jKBmcb@dpg-d4b1qoili9vc73dmoos0-a.oregon-postgres.render.com:5432/machine_learning_db'
+    )
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
     # CORS pour production - plus permissif
-    CORS(app)  # Laissez comme ça pour tous les domains temporairement
+    CORS(app)  # Laissez comme ça pour tous les domaines temporairement
+    db.init_app(app)
+
+    with app.app_context():
+        try:
+            db.create_all()  # Crée les tables si elles n'existent pas
+            # ✅ Test de connexion
+            engine = db.get_engine()
+            conn = engine.connect()
+            print("Connexion à PostgreSQL établie ✅")
+            conn.close()
+        except Exception as e:
+            print("Erreur de connexion à PostgreSQL :", e)
 
     # Éviter le chargement des données au démarrage (trop long)
     # with app.app_context():

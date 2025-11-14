@@ -5,20 +5,20 @@ Flask-Migrate==4.0.5
 Flask-SQLAlchemy==3.0.5
 gunicorn==21.2.0
 
-# Data Science
-pandas==1.5.3
-scikit-learn==1.2.2
-numpy==1.24.3
-scipy==1.10.1
-seaborn==0.12.2
-matplotlib==3.7.1
-imbalanced-learn==0.10.1
-joblib==1.2.0
+# Data Science (versions compatibles wheels pour Python 3.13)
+pandas==2.2.2
+scikit-learn==1.5.1
+numpy==2.1.1
+scipy==1.13.0
+seaborn==0.13.2
+matplotlib==3.8.4
+imbalanced-learn==0.12.3
+joblib==1.4.2
 
 # Base de données
 SQLAlchemy==2.0.23
 alembic==1.12.1
-greenlet==2.0.2
+greenlet==3.0.3
 psycopg2-binary==2.9.9
 
 # Autres

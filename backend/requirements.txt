@@ -22,6 +22,10 @@ alembic==1.12.1
 greenlet==2.0.2
 psycopg2-binary==2.9.7
 
+# Outils de build ESSENTIELS
+setuptools==70.0.0  # ← AJOUT CRITIQUE pour résoudre l'erreur
+wheel==0.43.0       # ← Recommandé pour de meilleures performances
+
 # Autres dépendances
 blinker==1.6.2
 click==8.1.7

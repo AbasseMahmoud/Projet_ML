@@ -12,7 +12,7 @@ def create_app():
     # Config PostgreSQL (Render) ou fallback local
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
         'DATABASE_URL',
-        'postgresql://machine_learning_db_user:YYDiI7DBB4d3LOQsyJYXm7LET9jKBmcb@dpg-d4b1qoili9vc73dmoos0-a.oregon-postgres.render.com:5432/machine_learning_db'
+        'sqlite:///local.db'  # Fallback to SQLite for local testing
     )
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 

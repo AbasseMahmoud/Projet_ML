@@ -1,9 +1,9 @@
 from flask import Blueprint, jsonify
 import pandas as pd 
 from flask import Blueprint, request, jsonify
-from app.models import User
-from app import db
-from Model.Entrainement import (
+from .models import User
+from . import db
+from ..Model.Entrainement import (
     train_model,
     verifier_valeurs_manquantes,
     verifier_valeur_aberantes, 
@@ -465,7 +465,7 @@ def get_valeurs_aberrantes():
 @bp.route('/statistiques-normalisation', methods=['GET'])
 def get_statistiques_normalisation():
     try:
-        from Model.Entrainement import get_normalisation_stats
+        from ..Model.Entrainement import get_normalisation_stats
         
         print("🔍 Début de la route /statistiques-normalisation")
         stats = get_normalisation_stats()

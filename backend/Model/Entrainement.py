@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from sklearn.utils import resample
 from imblearn.over_sampling import SMOTE
 import joblib as jb
+import seaborn as sns
 def train_model():
     pf = pd.read_csv("Model/creditcarddata.csv")  
     print(pf.head())

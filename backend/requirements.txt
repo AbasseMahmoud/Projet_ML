@@ -1,5 +1,5 @@
 # Outils de build ESSENTIELS - Installer en premier
-setuptools>=70.0.0  # ← Version minimale pour Python 3.13
+setuptools>=70.0.0  # ← Version minimale pour Python 3.12
 wheel>=0.43.0       # ← Recommandé pour de meilleures performances
 build>=1.0.0        # ← Nécessaire pour la construction des packages
 
@@ -10,7 +10,7 @@ Flask-Migrate>=4.0.5
 Flask-SQLAlchemy>=3.1.1
 gunicorn>=21.2.0
 
-# Data Science - versions COMPATIBLES pour Python 3.13 (dernières versions avec wheels)
+# Data Science - versions COMPATIBLES pour Python 3.12 (dernières versions avec wheels)
 pandas>=2.2.0
 scikit-learn>=1.5.0
 numpy>=1.26.0

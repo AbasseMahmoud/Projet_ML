@@ -7,26 +7,17 @@ interface TransactionModalProps {
   onSave: (result?: TransactionResult) => void;
 }
 
-// Interface pour la prédiction
+// Interface simplifiée pour la prédiction
 interface PredictionData {
   prediction: number;
   probability_fraud: number;
-  probability_legit?: number;
-  risk_level: string;
-  confidence?: number;
 }
 
-// Interface pour le résultat de transaction
-interface TransactionResult {
+// Interface simplifiée pour le résultat
+export interface TransactionResult {
   transactionData: any;
-  fraudStatus: {
-    isFraud: boolean;
-    needsReview: boolean;
-    status: string;
-    color: string;
-    icon: string;
-    description: string;
-  };
+  isFraud: boolean;
+  probability: number;
   prediction: PredictionData | null;
 }
 
@@ -37,17 +28,7 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
   
   if (!open) return null;
 
-  // Fonction pour convertir les niveaux de risque en français
-  const mapRiskLevel = (level: string): string => {
-    const levelMap: { [key: string]: string } = {
-      'LOW': 'FAIBLE',
-      'MEDIUM': 'MOYEN', 
-      'HIGH': 'ÉLEVÉ'
-    };
-    return levelMap[level] || level;
-  };
-
-  // Fonction de validation des champs
+  // Fonction de validation des champs (inchangée)
   const validateForm = (formData: FormData): Record<string, string> => {
     const newErrors: Record<string, string> = {};
     const requiredFields = [
@@ -70,7 +51,7 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
     return newErrors;
   };
 
-  // Mapping EXACT selon vos données avec validation
+  // Mapping EXACT selon vos données avec validation (inchangé)
   const mapToModelFeatures = (formData: any) => {
     const features = {
       Gender: parseInt(formData.gender) || 0,
@@ -106,18 +87,14 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
       console.log('Données envoyées au modèle:', modelData);
       
       const response = await axios.post('https://projet-ml-uxvm.onrender.com/api/predict', modelData, {
-        timeout:  30000,
+        timeout: 30000,
         headers: { 'Content-Type': 'application/json' }
       });
       
       if (response.data && response.data.success) {
-        // ✅ Adaptation à la structure réelle du backend
         const predictionData: PredictionData = {
           prediction: response.data.prediction,
-          probability_fraud: response.data.probability_fraud,
-          probability_legit: response.data.probability_legit,
-          risk_level: mapRiskLevel(response.data.risk_level),
-          confidence: response.data.confidence
+          probability_fraud: response.data.probability_fraud
         };
         setPrediction(predictionData);
         return predictionData;
@@ -132,53 +109,13 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
     }
   };
 
-  // Fonction pour déterminer le statut de fraude - VERSION AMÉLIORÉE
-  const getFraudStatus = (predictionData: PredictionData | null) => {
-    if (!predictionData) return { 
-      isFraud: false, 
-      needsReview: false,
-      status: 'Indéterminé', 
-      color: 'gray',
-      icon: '❓',
-      description: 'En attente d\'analyse'
-    };
+  // ✅ FONCTION SIMPLIFIÉE - Retourne seulement si c'est une fraude ou non
+  const checkIfFraud = (predictionData: PredictionData | null): boolean => {
+    if (!predictionData) return false;
     
-    const isFraud = predictionData.prediction === 1;
-    const probability = (predictionData.probability_fraud || 0) * 100;
-    
-    // ✅ RÈGLES MÉTIER SUPPLÉMENTAIRES
-    const highRiskProbability = probability > 40; // Seuil élevé → FRAUDE
-    const mediumRiskProbability = probability > 20 && probability <= 40; // Zone grise → À VÉRIFIER
-    const lowRiskProbability = probability <= 20; // Faible risque → NORMAL
-    
-    if (isFraud || highRiskProbability) {
-      return {
-        isFraud: true,
-        needsReview: false,
-        status: 'FRAUDE DÉTECTÉE',
-        color: 'red',
-        icon: '🚨',
-        description: 'Transaction suspecte - Intervention requise'
-      };
-    } else if (mediumRiskProbability) {
-      return {
-        isFraud: false,
-        needsReview: true,
-        status: 'À VÉRIFIER',
-        color: 'orange',
-        icon: '⚠️',
-        description: 'Transaction suspecte - Vérification recommandée'
-      };
-    } else {
-      return {
-        isFraud: false,
-        needsReview: false,
-        status: 'TRANSPARENT',
-        color: 'green',
-        icon: '✅',
-        description: 'Transaction sécurisée'
-      };
-    }
+    // Logique binaire : si prediction = 1 OU probabilité > 50% → FRAUDE
+    const isFraud = predictionData.prediction === 1 || (predictionData.probability_fraud || 0) > 0.5;
+    return isFraud;
   };
 
   // Gestion de la soumission du formulaire
@@ -197,19 +134,16 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
     
     try {
       const fraudPrediction = await analyzeTransaction(transactionData);
-      const fraudStatus = getFraudStatus(fraudPrediction);
+      const isFraud = checkIfFraud(fraudPrediction);
       
+      // ✅ RÉSULTAT SIMPLIFIÉ : seulement transaction ou fraude
       const transactionResult: TransactionResult = {
         transactionData: {
           ...transactionData,
-          fraudPrediction: fraudPrediction || {
-            prediction: 0,
-            probability_fraud: 0,
-            risk_level: 'FAIBLE'
-          },
           analyzedAt: new Date().toISOString()
         },
-        fraudStatus,
+        isFraud: isFraud,
+        probability: (fraudPrediction.probability_fraud || 0) * 100,
         prediction: fraudPrediction
       };
       
@@ -232,7 +166,7 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
     }
   };
 
-  // Composant de champ avec validation
+  // Composant de champ avec validation (inchangé)
   const FormField = ({ name, label, type = "number", placeholder, step, min, max }: any) => (
     <div>
       <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -259,43 +193,9 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
     </div>
   );
 
-  const fraudStatus = getFraudStatus(prediction);
-
-  // Couleurs dynamiques selon le statut
-  const getStatusStyles = () => {
-    switch (fraudStatus.color) {
-      case 'red':
-        return {
-          container: 'bg-red-50 border-red-500 shadow-lg shadow-red-100',
-          icon: 'bg-red-100 text-red-600',
-          text: 'text-red-800',
-          badge: 'bg-red-100 text-red-800 border-red-300'
-        };
-      case 'orange':
-        return {
-          container: 'bg-orange-50 border-orange-500 shadow-lg shadow-orange-100',
-          icon: 'bg-orange-100 text-orange-600',
-          text: 'text-orange-800',
-          badge: 'bg-orange-100 text-orange-800 border-orange-300'
-        };
-      case 'green':
-        return {
-          container: 'bg-green-50 border-green-500 shadow-lg shadow-green-100',
-          icon: 'bg-green-100 text-green-600',
-          text: 'text-green-800',
-          badge: 'bg-green-100 text-green-800 border-green-300'
-        };
-      default:
-        return {
-          container: 'bg-gray-50 border-gray-500 shadow-lg shadow-gray-100',
-          icon: 'bg-gray-100 text-gray-600',
-          text: 'text-gray-800',
-          badge: 'bg-gray-100 text-gray-800 border-gray-300'
-        };
-    }
-  };
-
-  const statusStyles = getStatusStyles();
+  // ✅ AFFICHAGE SIMPLIFIÉ du résultat
+  const isFraud = checkIfFraud(prediction);
+  const probability = prediction ? (prediction.probability_fraud * 100) : 0;
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -318,94 +218,71 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
         </div>
 
         {/* Message d'erreur global */}
-        {Object.keys(errors).length > 0 && (
+        {errors.global && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
             <div className="flex items-center space-x-2 text-red-700">
               <span>⚠️</span>
-              <p className="font-medium">
-                {errors.global || 'Veuillez corriger les erreurs ci-dessous avant de continuer'}
-              </p>
+              <p className="font-medium">{errors.global}</p>
             </div>
           </div>
         )}
 
-        {/* Résultat de l'analyse */}
+        {/* ✅ RÉSULTAT SIMPLIFIÉ - seulement Transaction ou Fraude */}
         {prediction && (
-          <div className={`mb-6 p-6 rounded-2xl border-l-4 ${statusStyles.container}`}>
-            <div className="flex items-start justify-between">
-              <div className="flex items-start space-x-4">
-                <div className={`p-3 rounded-full text-2xl ${statusStyles.icon}`}>
-                  {fraudStatus.icon}
-                </div>
-                <div className="flex-1">
-                  <h3 className={`text-xl font-bold mb-2 ${statusStyles.text}`}>
-                    {fraudStatus.status}
-                  </h3>
-                  <p className={`text-lg font-semibold mb-1 ${statusStyles.text}`}>
-                    {fraudStatus.description}
-                  </p>
-                  <div className="grid grid-cols-2 gap-4 mt-3">
-                    <div>
-                      <p className="text-sm text-slate-600">Probabilité de fraude</p>
-                      <p className={`text-lg font-bold ${
-                        fraudStatus.isFraud ? 'text-red-700' : 
-                        fraudStatus.needsReview ? 'text-orange-700' : 'text-green-700'
-                      }`}>
-                        {((prediction.probability_fraud || 0) * 100).toFixed(1)}%
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-slate-600">Décision du modèle</p>
-                      <p className={`text-lg font-bold ${
-                        fraudStatus.isFraud ? 'text-red-700' : 
-                        fraudStatus.needsReview ? 'text-orange-700' : 'text-green-700'
-                      }`}>
-                        {fraudStatus.isFraud ? 'FRAUDE' : 
-                         fraudStatus.needsReview ? 'SUSPECT' : 'NORMAL'}
-                      </p>
-                    </div>
+          <div className={`mb-6 p-6 rounded-2xl border-l-4 ${
+            isFraud 
+              ? 'bg-red-50 border-red-500 shadow-lg shadow-red-100' 
+              : 'bg-green-50 border-green-500 shadow-lg shadow-green-100'
+          }`}>
+            <div className="flex items-center space-x-4">
+              <div className={`p-3 rounded-full text-2xl ${
+                isFraud ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'
+              }`}>
+                {isFraud ? '🚨' : '✅'}
+              </div>
+              <div className="flex-1">
+                <h3 className={`text-xl font-bold mb-2 ${
+                  isFraud ? 'text-red-800' : 'text-green-800'
+                }`}>
+                  {isFraud ? 'FRAUDE DÉTECTÉE' : 'TRANSACTION VALIDE'}
+                </h3>
+                <p className={`text-lg font-semibold mb-1 ${
+                  isFraud ? 'text-red-700' : 'text-green-700'
+                }`}>
+                  {isFraud 
+                    ? 'Transaction suspecte - Intervention requise' 
+                    : 'Transaction sécurisée - Aucun problème détecté'
+                  }
+                </p>
+                <div className="grid grid-cols-2 gap-4 mt-3">
+                  <div>
+                    <p className="text-sm text-slate-600">Probabilité de fraude</p>
+                    <p className={`text-lg font-bold ${
+                      isFraud ? 'text-red-700' : 'text-green-700'
+                    }`}>
+                      {probability.toFixed(1)}%
+                    </p>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 mt-3">
-                    <div>
-                      <p className="text-sm text-slate-600">Confiance</p>
-                      <p className="text-lg font-bold text-blue-700">
-                        {((prediction.confidence || 0) * 100).toFixed(1)}%
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-slate-600">Niveau de risque</p>
-                      <p className={`text-lg font-bold ${
-                        prediction.risk_level === 'ÉLEVÉ' ? 'text-red-700' :
-                        prediction.risk_level === 'MOYEN' ? 'text-orange-700' : 
-                        'text-green-700'
-                      }`}>
-                        {prediction.risk_level}
-                      </p>
-                    </div>
+                  <div>
+                    <p className="text-sm text-slate-600">Statut</p>
+                    <p className={`text-lg font-bold ${
+                      isFraud ? 'text-red-700' : 'text-green-700'
+                    }`}>
+                      {isFraud ? 'FRAUDE' : 'NORMAL'}
+                    </p>
                   </div>
                 </div>
               </div>
-              <span className={`px-4 py-2 rounded-full text-sm font-bold ${statusStyles.badge}`}>
-                {prediction.risk_level}
-              </span>
             </div>
             
-            {/* Message d'alerte supplémentaire pour les fraudes et vérifications */}
-            {(fraudStatus.isFraud || fraudStatus.needsReview) && (
-              <div className={`mt-4 p-3 ${
-                fraudStatus.isFraud ? 'bg-red-100 border-red-300' : 'bg-orange-100 border-orange-300'
-              } border rounded-lg`}>
+            {/* Message d'alerte seulement pour les fraudes */}
+            {isFraud && (
+              <div className="mt-4 p-3 bg-red-100 border border-red-300 rounded-lg">
                 <div className="flex items-center space-x-2">
-                  <span className={fraudStatus.isFraud ? 'text-red-600' : 'text-orange-600'}>
-                    {fraudStatus.isFraud ? '🚨' : '⚠️'}
-                  </span>
-                  <p className={`font-medium text-sm ${
-                    fraudStatus.isFraud ? 'text-red-700' : 'text-orange-700'
-                  }`}>
-                    {fraudStatus.isFraud 
-                      ? 'Alerte : Cette transaction présente des caractéristiques suspectes. Recommandation : Intervention immédiate requise.'
-                      : 'Alerte : Cette transaction nécessite une vérification manuelle. Recommandation : Contacter le client pour confirmation.'
-                    }
+                  <span className="text-red-600">🚨</span>
+                  <p className="font-medium text-sm text-red-700">
+                    Alerte : Cette transaction présente des caractéristiques suspectes. 
+                    Recommandation : Intervention immédiate requise.
                   </p>
                 </div>
               </div>
@@ -413,7 +290,7 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
           </div>
         )}
 
-        {/* Formulaire */}
+        {/* Formulaire (inchangé) */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Section Informations Client */}
           <div className="space-y-4">

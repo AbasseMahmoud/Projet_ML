@@ -132,48 +132,34 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
     }
   };
 
-  // Fonction pour déterminer le statut de fraude - VERSION AMÉLIORÉE
+  // Fonction pour déterminer le statut de fraude - VERSION SIMPLIFIÉE
   const getFraudStatus = (predictionData: PredictionData | null) => {
     if (!predictionData) return { 
       isFraud: false, 
       needsReview: false,
-      status: 'Indéterminé', 
-      color: 'gray',
-      icon: '❓',
+      status: 'NON FRAUDE', 
+      color: 'green',
+      icon: '✅',
       description: 'En attente d\'analyse'
     };
     
     const isFraud = predictionData.prediction === 1;
     const probability = (predictionData.probability_fraud || 0) * 100;
-    
-    // ✅ RÈGLES MÉTIER SUPPLÉMENTAIRES
-    const highRiskProbability = probability > 40; // Seuil élevé → FRAUDE
-    const mediumRiskProbability = probability > 20 && probability <= 40; // Zone grise → À VÉRIFIER
-    const lowRiskProbability = probability <= 20; // Faible risque → NORMAL
-    
-    if (isFraud || highRiskProbability) {
+
+    if (isFraud || probability > 40) {
       return {
         isFraud: true,
         needsReview: false,
-        status: 'FRAUDE DÉTECTÉE',
+        status: 'FRAUDE',
         color: 'red',
         icon: '🚨',
         description: 'Transaction suspecte - Intervention requise'
-      };
-    } else if (mediumRiskProbability) {
-      return {
-        isFraud: false,
-        needsReview: true,
-        status: 'À VÉRIFIER',
-        color: 'orange',
-        icon: '⚠️',
-        description: 'Transaction suspecte - Vérification recommandée'
       };
     } else {
       return {
         isFraud: false,
         needsReview: false,
-        status: 'TRANSPARENT',
+        status: 'NON FRAUDE',
         color: 'green',
         icon: '✅',
         description: 'Transaction sécurisée'
@@ -360,8 +346,7 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
                         fraudStatus.isFraud ? 'text-red-700' : 
                         fraudStatus.needsReview ? 'text-orange-700' : 'text-green-700'
                       }`}>
-                        {fraudStatus.isFraud ? 'FRAUDE' : 
-                         fraudStatus.needsReview ? 'SUSPECT' : 'NORMAL'}
+                      {fraudStatus.isFraud ? 'FRAUDE' : 'NON FRAUDE'}
                       </p>
                     </div>
                   </div>
@@ -391,21 +376,13 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
             </div>
             
             {/* Message d'alerte supplémentaire pour les fraudes et vérifications */}
-            {(fraudStatus.isFraud || fraudStatus.needsReview) && (
-              <div className={`mt-4 p-3 ${
-                fraudStatus.isFraud ? 'bg-red-100 border-red-300' : 'bg-orange-100 border-orange-300'
-              } border rounded-lg`}>
+
+            {(fraudStatus.isFraud) && (
+              <div className={`mt-4 p-3 bg-red-100 border-red-300 border rounded-lg`}>
                 <div className="flex items-center space-x-2">
-                  <span className={fraudStatus.isFraud ? 'text-red-600' : 'text-orange-600'}>
-                    {fraudStatus.isFraud ? '🚨' : '⚠️'}
-                  </span>
-                  <p className={`font-medium text-sm ${
-                    fraudStatus.isFraud ? 'text-red-700' : 'text-orange-700'
-                  }`}>
-                    {fraudStatus.isFraud 
-                      ? 'Alerte : Cette transaction présente des caractéristiques suspectes. Recommandation : Intervention immédiate requise.'
-                      : 'Alerte : Cette transaction nécessite une vérification manuelle. Recommandation : Contacter le client pour confirmation.'
-                    }
+                  <span className='text-red-600'>🚨</span>
+                  <p className="font-medium text-sm text-red-700">
+                    Alerte : Cette transaction présente des caractéristiques suspectes. Recommandation : Intervention immédiate requise.
                   </p>
                 </div>
               </div>

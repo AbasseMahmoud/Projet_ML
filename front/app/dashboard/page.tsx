@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import TransactionnelModal from '../components/TransactionModal';
+import TransactionnelModal, { TransactionResult } from '../components/TransactionModal';
 import AlertsModal from './AlertsModal';
 import ConfusionMatrices from '../components/ConfusionMatrices';
 import DataDistribution from '../components/DataDistribution';
@@ -15,7 +15,7 @@ interface FlashMessage {
   title: string;
   message: string;
   timestamp: Date;
-  transactionResult?: any;
+  transactionResult?: TransactionResult;
 }
 
 const Dashboard = () => {

@@ -4,7 +4,7 @@ import axios from 'axios';
 interface TransactionModalProps {
   open: boolean;
   onClose: () => void;
-  onSave: (data?: any) => void;
+  onSave: (result?: TransactionResult) => void;
 }
 
 // Interface pour la prédiction
@@ -14,6 +14,20 @@ interface PredictionData {
   probability_legit?: number;
   risk_level: string;
   confidence?: number;
+}
+
+// Interface pour le résultat de transaction
+interface TransactionResult {
+  transactionData: any;
+  fraudStatus: {
+    isFraud: boolean;
+    needsReview: boolean;
+    status: string;
+    color: string;
+    icon: string;
+    description: string;
+  };
+  prediction: PredictionData | null;
 }
 
 const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, onSave }) => {
@@ -183,19 +197,25 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
     
     try {
       const fraudPrediction = await analyzeTransaction(transactionData);
-      const transactionWithPrediction = {
-        ...transactionData,
-        fraudPrediction: fraudPrediction || {
-          prediction: 0,
-          probability_fraud: 0,
-          risk_level: 'FAIBLE'
+      const fraudStatus = getFraudStatus(fraudPrediction);
+      
+      const transactionResult: TransactionResult = {
+        transactionData: {
+          ...transactionData,
+          fraudPrediction: fraudPrediction || {
+            prediction: 0,
+            probability_fraud: 0,
+            risk_level: 'FAIBLE'
+          },
+          analyzedAt: new Date().toISOString()
         },
-        analyzedAt: new Date().toISOString()
+        fraudStatus,
+        prediction: fraudPrediction
       };
-      onSave(transactionWithPrediction);
+      
+      onSave(transactionResult);
     } catch (error) {
       console.error('Erreur lors de l\'analyse:', error);
-      // Afficher un message d'erreur à l'utilisateur
       setErrors({ 
         global: 'Erreur lors de l\'analyse de la transaction. Veuillez réessayer.' 
       });

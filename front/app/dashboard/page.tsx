@@ -1,17 +1,27 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TransactionnelModal from '../components/TransactionModal';
 import AlertsModal from './AlertsModal';
-// import ModelsModal from './ModelsModal';
 import ConfusionMatrices from '../components/ConfusionMatrices';
 import DataDistribution from '../components/DataDistribution';
 import AnalyticsModal from '../components/AnalyticsModal';
 import NormalisationStatsModal from '../components/NormalisationStats';
 
+// Interface pour le message flash
+interface FlashMessage {
+  id: string;
+  type: 'success' | 'warning' | 'error' | 'info';
+  title: string;
+  message: string;
+  timestamp: Date;
+  transactionResult?: any;
+}
+
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [flashMessages, setFlashMessages] = useState<FlashMessage[]>([]);
 
   const [isTransactionsModalOpen, setIsTransactionsModalOpen] = useState(false);
   const [isAlertsModalOpen, setIsAlertsModalOpen] = useState(false);
@@ -21,8 +31,110 @@ const Dashboard = () => {
   const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
   const [isNormalisationStatsOpen, setIsNormalisationStatsOpen] = useState(false);
 
+  // Fonction pour ajouter un message flash
+  const addFlashMessage = (message: Omit<FlashMessage, 'id' | 'timestamp'>) => {
+    const newMessage: FlashMessage = {
+      ...message,
+      id: Math.random().toString(36).substr(2, 9),
+      timestamp: new Date()
+    };
+    
+    setFlashMessages(prev => [newMessage, ...prev]);
+  };
+
+  // Fonction pour supprimer un message flash
+  const removeFlashMessage = (id: string) => {
+    setFlashMessages(prev => prev.filter(msg => msg.id !== id));
+  };
+
+  // Suppression automatique après 5 secondes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (flashMessages.length > 0) {
+        setFlashMessages(prev => prev.slice(0, -1));
+      }
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [flashMessages]);
+
+  // Fonction pour déterminer les styles du message flash
+  const getFlashMessageStyles = (type: string) => {
+    switch (type) {
+      case 'success':
+        return 'bg-green-50 border-green-200 text-green-800';
+      case 'warning':
+        return 'bg-orange-50 border-orange-200 text-orange-800';
+      case 'error':
+        return 'bg-red-50 border-red-200 text-red-800';
+      case 'info':
+        return 'bg-blue-50 border-blue-200 text-blue-800';
+      default:
+        return 'bg-gray-50 border-gray-200 text-gray-800';
+    }
+  };
+
+  // Fonction pour obtenir l'icône du message
+  const getFlashMessageIcon = (type: string) => {
+    switch (type) {
+      case 'success':
+        return '✅';
+      case 'warning':
+        return '⚠️';
+      case 'error':
+        return '❌';
+      case 'info':
+        return 'ℹ️';
+      default:
+        return '💡';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 flex">
+      {/* Messages Flash */}
+      {flashMessages.length > 0 && (
+        <div className="fixed top-4 right-4 z-50 space-y-3 max-w-md w-full">
+          {flashMessages.map((message) => (
+            <div
+              key={message.id}
+              className={`p-4 rounded-2xl border-2 shadow-lg animate-fade-in-up ${getFlashMessageStyles(message.type)}`}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-start space-x-3">
+                  <span className="text-xl mt-0.5">{getFlashMessageIcon(message.type)}</span>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-sm mb-1">{message.title}</h4>
+                    <p className="text-sm opacity-90">{message.message}</p>
+                    {message.transactionResult && (
+                      <div className="mt-2 p-2 bg-white/50 rounded-lg">
+                        <p className="text-xs font-medium">
+                          Statut: {message.transactionResult.fraudStatus.status}
+                        </p>
+                        <p className="text-xs">
+                          Risque: {((message.transactionResult.prediction?.probability_fraud || 0) * 100).toFixed(1)}%
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={() => removeFlashMessage(message.id)}
+                  className="p-1 hover:bg-white/50 rounded-lg transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="text-xs opacity-70 mt-2">
+                {message.timestamp.toLocaleTimeString()}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Sidebar */}
       <div className={`fixed inset-y-0 left-0 z-50 w-80 bg-white/95 backdrop-blur-xl border-r border-slate-200/60 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-all duration-500 ease-out lg:relative lg:translate-x-0 lg:flex lg:flex-col lg:h-screen lg:sticky lg:top-0 shadow-2xl shadow-blue-500/5`}>
         {/* Logo */}
@@ -45,57 +157,41 @@ const Dashboard = () => {
         {/* Navigation */}
         <nav className="flex-1 mt-8 px-4">
           {[
-
-            // { 
-            //   id: 'normalisation',  
-            //   name: 'Normalisation', 
-            //   icon: '⚖️', 
-            //   badge: 'New',
-            //   onClick: () => setIsNormalisationStatsOpen(true)
-            // },
             { 
               id: 'transactions', 
               name: 'Transactions', 
               icon: '💳', 
-              badge: '12',
+             
               onClick: () => setIsTransactionsModalOpen(true)
             },
             { 
               id: 'alerts', 
               name: 'Modeles IA et Valeurs', 
               icon: '🚨', 
-              badge: '3',
+              badge: '2',
               onClick: () => setIsAlertsModalOpen(true)
             },
             { 
               id: 'analytics', 
               name: 'Valeurs Aberantes', 
               icon: '📈', 
-              badge: null,
+              badge: '',
               onClick: () => setIsAnalyticsModalOpen(true) 
             },
-            
-            // { 
-            //   id: 'models', 
-            //   name: 'Modèles IA', 
-            //   icon: '🤖', 
-            //   badge: 'New',
-            //   onClick: () => setIsModelsModalOpen(true)
-            // },
             { 
               id: 'confusion-matrices', 
               name: 'Matrices Confusion', 
               icon: '📊', 
-              badge: 'New',
+              badge: '5',
               onClick: () => setIsConfusionMatricesOpen(true)
             },
             {
-            id: 'data-distribution', 
-            name: 'Distribution Données', 
-            icon: '📈', 
-            badge: 'New',
-            onClick: () => setIsDataDistributionOpen(true)
-          },
+              id: 'data-distribution', 
+              name: 'Distribution Données', 
+              icon: '📈', 
+              badge: '2',
+              onClick: () => setIsDataDistributionOpen(true)
+            },
           ].map((item) => (
             <button
               key={item.id}
@@ -195,14 +291,6 @@ const Dashboard = () => {
 
         {/* Main Dashboard Content */}
         <main className="flex-1 p-8 overflow-auto">
-          {/* Stats Grid */}
-          {/* Charts and Alerts Section */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
-            {/* Performance Metrics */}
-
-            {/* Recent Alerts */}
-          </div>
-
           {/* Quick Actions */}
           <div className="bg-white rounded-3xl p-8 border border-slate-200/60 shadow-lg shadow-slate-500/10">
             <h2 className="text-2xl font-bold text-slate-900 mb-8">Actions Rapides</h2>
@@ -249,8 +337,34 @@ const Dashboard = () => {
       <TransactionnelModal 
         open={isTransactionsModalOpen}
         onClose={() => setIsTransactionsModalOpen(false)}
-        onSave={(transactionData) => {
-          console.log('Transaction sauvegardée:', transactionData);
+        onSave={(transactionResult) => {
+          if (transactionResult) {
+            console.log('Transaction sauvegardée:', transactionResult);
+            
+            // Déterminer le type de message basé sur le statut de fraude
+            let messageType: 'success' | 'warning' | 'error' = 'success';
+            let messageTitle = 'Transaction Approuvée';
+            let messageText = 'La transaction a été analysée et approuvée avec succès.';
+
+            if (transactionResult.fraudStatus.isFraud) {
+              messageType = 'error';
+              messageTitle = 'Fraude Détectée !';
+              messageText = 'Transaction bloquée - Activité suspecte détectée.';
+            } else if (transactionResult.fraudStatus.needsReview) {
+              messageType = 'warning';
+              messageTitle = 'Vérification Requise';
+              messageText = 'Cette transaction nécessite une vérification manuelle.';
+            }
+
+            // Ajouter le message flash
+            addFlashMessage({
+              type: messageType,
+              title: messageTitle,
+              message: messageText,
+              transactionResult: transactionResult
+            });
+          }
+          
           setIsTransactionsModalOpen(false);
         }}
       />
@@ -261,28 +375,23 @@ const Dashboard = () => {
         onClose={() => setIsAlertsModalOpen(false)}
       />
 
-      {/* Modal des Modèles IA */}
-      {/* <ModelsModal 
-        open={isModelsModalOpen}
-        onClose={() => setIsModelsModalOpen(false)}
-      /> */}
-
       {/* Modal des Matrices de Confusion */}
       <ConfusionMatrices 
         open={isConfusionMatricesOpen}
         onClose={() => setIsConfusionMatricesOpen(false)}
       />
 
-<NormalisationStatsModal 
-  open={isNormalisationStatsOpen}
-  onClose={() => setIsNormalisationStatsOpen(false)}
-/>
+      <NormalisationStatsModal 
+        open={isNormalisationStatsOpen}
+        onClose={() => setIsNormalisationStatsOpen(false)}
+      />
 
-  <DataDistribution 
-  open={isDataDistributionOpen}
-  onClose={() => setIsDataDistributionOpen(false)}
-/>
- {/* Modal des Analytiques  */}
+      <DataDistribution 
+        open={isDataDistributionOpen}
+        onClose={() => setIsDataDistributionOpen(false)}
+      />
+
+      {/* Modal des Analytiques */}
       <AnalyticsModal 
         open={isAnalyticsModalOpen}
         onClose={() => setIsAnalyticsModalOpen(false)}

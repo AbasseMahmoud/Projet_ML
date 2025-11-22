@@ -290,6 +290,7 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
           </div>
         )}
 
+        {/* commentaire  */}
         {/* Formulaire (inchangé) */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Section Informations Client */}

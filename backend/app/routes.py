@@ -1,8 +1,6 @@
 from flask import Blueprint, jsonify
 import pandas as pd 
 from flask import Blueprint, request, jsonify
-from .models import User
-from . import db
 from Model.Entrainement import (
     train_model,
     verifier_valeurs_manquantes,

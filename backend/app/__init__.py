@@ -10,26 +10,26 @@ def create_app():
     app = Flask(__name__)
 
     # Config PostgreSQL (Render) ou fallback local
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
-        'DATABASE_URL',
-        'sqlite:///local.db'  # Fallback to SQLite for local testing
-    )
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    # app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
+    #     'DATABASE_URL',
+    #     'sqlite:///local.db'  # Fallback to SQLite for local testing
+    # )
+    # app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # CORS pour production - plus permissif
     CORS(app)  # Laissez comme ça pour tous les domaines temporairement
-    db.init_app(app)
+    # db.init_app(app)
 
-    with app.app_context():
-        try:
-            db.create_all()  # Crée les tables si elles n'existent pas
-            # ✅ Test de connexion
-            engine = db.get_engine()
-            conn = engine.connect()
-            print("Connexion à PostgreSQL établie ✅")
-            conn.close()
-        except Exception as e:
-            print("Erreur de connexion à PostgreSQL :", e)
+    # with app.app_context():
+    #     try:
+    #         db.create_all()  # Crée les tables si elles n'existent pas
+    #         # ✅ Test de connexion
+    #         engine = db.get_engine()
+    #         conn = engine.connect()
+    #         print("Connexion à PostgreSQL établie ✅")
+    #         conn.close()
+    #     except Exception as e:
+    #         print("Erreur de connexion à PostgreSQL :", e)
 
     # Éviter le chargement des données au démarrage (trop long)
     # with app.app_context():

@@ -1,6 +1,6 @@
 // lib/api.js
 export const API_CONFIG = {
-  BASE_URL: 'https://projet-ml-uxvm.onrender.com', // VOTRE BACKEND FLASK
+  BASE_URL: 'https://projet-ml-uxvm.onrender.com', //  BACKEND FLASK
   ENDPOINTS: {
     PREDICT: '/api/predict',
     STATS: '/api/analyse-metrics',

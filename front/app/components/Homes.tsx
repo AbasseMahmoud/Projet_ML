@@ -120,7 +120,7 @@ const Home = () => {
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <span>61.3% de précision</span>
               </motion.div>
-              <motion.div
+              <motion.div 
                 className="flex items-center space-x-2"
                 whileHover={{ scale: 1.1 }}
               >
@@ -176,7 +176,7 @@ const Home = () => {
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Sécurité Renforcée</h3>
               <p className="text-gray-600 text-lg leading-relaxed">
-                Détection proactive des transactions suspectes avec un taux de précision de 61.3%.
+                Détection proactive des transactions suspectes avec un taux de précision de 91.3%.
               </p>
             </motion.div>
 

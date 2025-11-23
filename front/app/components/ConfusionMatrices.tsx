@@ -21,6 +21,7 @@ const CloseIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
   </svg>
 );
+
 interface ConfusionMatrixData {
   model: string;
   matrix: number[][];
@@ -54,83 +55,53 @@ const ConfusionMatrices: React.FC<ConfusionMatricesProps> = ({ open, onClose }) 
     }
   }, [open]);
 
-  // const fetchMatrices = async () => {
-  //   setLoading(true);
-  //   setError(null);
-  //   try {
-  //     //  URL de l'API Flask
-  //     // const response = await fetch('http://localhost:5000/api/matrices-confusion');
-  //     const response = await apiService.getConfusionMatrices();
-      
-  //     if (!response.ok) {
-  //       throw new Error(`Erreur HTTP: ${response.status}`);
-  //     }
-      
-  //     const result = await response.json();
-      
-  //     // CORRECTION : Vérifier la structure de la réponse
-  //     if (result.success && Array.isArray(result.data)) {
-  //       setMatrices(result.data);
-  //       if (result.data.length > 0) {
-  //         setSelectedModel(result.data[0].model);
-  //       }
-  //     } else if (Array.isArray(result)) {
-  //       // Si l'API retourne directement un tableau
-  //       setMatrices(result);
-  //       if (result.length > 0) {
-  //         setSelectedModel(result[0].model);
-  //       }
-  //     } else {
-  //       throw new Error('Format de réponse inattendu de l\'API');
-  //     }
-  //   } catch (err) {
-  //     setError(err instanceof Error ? err.message : 'Erreur inconnue');
-  //     console.error('Erreur fetch matrices:', err);
-  //     // Données de secours
-  //     setMatrices(getFallbackMatrices());
-  //     if (getFallbackMatrices().length > 0) {
-  //       setSelectedModel(getFallbackMatrices()[0].model);
-  //     }
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const fetchMatrices = async () => {
-  setLoading(true);
-  setError(null);
-  try {
-    // CORRECTION : Le service retourne déjà les données JSON
-    const result = await apiService.getConfusionMatrices();
-    
-    // Vérifier la structure de la réponse
-    if (result.success && Array.isArray(result.data)) {
-      setMatrices(result.data);
-      if (result.data.length > 0) {
-        setSelectedModel(result.data[0].model);
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await apiService.getConfusionMatrices();
+      
+      if (result.success && Array.isArray(result.data)) {
+        setMatrices(result.data);
+        if (result.data.length > 0) {
+          setSelectedModel(result.data[0].model);
+        }
+      } else {
+        throw new Error('Format de réponse inattendu');
       }
-    } else {
-      throw new Error('Format de réponse inattendu');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur inconnue');
+      console.error('Erreur fetch matrices:', err);
+      setMatrices(getFallbackMatrices());
+      if (getFallbackMatrices().length > 0) {
+        setSelectedModel(getFallbackMatrices()[0].model);
+      }
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    setError(err instanceof Error ? err.message : 'Erreur inconnue');
-    console.error('Erreur fetch matrices:', err);
-    // Données de secours
-    setMatrices(getFallbackMatrices());
-    if (getFallbackMatrices().length > 0) {
-      setSelectedModel(getFallbackMatrices()[0].model);
-    }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
+
   const selectedMatrix = matrices && Array.isArray(matrices) 
     ? matrices.find(matrix => matrix.model === selectedModel)
     : null;
 
-  const getPerformanceColor = (f1Score: number) => {
-    if (f1Score >= 0.5) return 'bg-green-100 text-green-700';
-    if (f1Score >= 0.3) return 'bg-orange-100 text-orange-700';
+  // Fonction pour calculer l'accuracy si elle n'est pas fournie
+  const calculateAccuracy = (matrix: ConfusionMatrixData) => {
+    if (matrix.metrics.accuracy !== undefined) {
+      return matrix.metrics.accuracy;
+    }
+    
+    const { true_negatives, false_positives, false_negatives, true_positives } = matrix.metrics;
+    const total = true_negatives + false_positives + false_negatives + true_positives;
+    const correct = true_negatives + true_positives;
+    
+    return total > 0 ? correct / total : 0;
+  };
+
+  const getPerformanceColor = (accuracy: number) => {
+    if (accuracy >= 0.9) return 'bg-green-100 text-green-700';
+    if (accuracy >= 0.7) return 'bg-blue-100 text-blue-700';
+    if (accuracy >= 0.5) return 'bg-orange-100 text-orange-700';
     return 'bg-red-100 text-red-700';
   };
 
@@ -197,24 +168,27 @@ const ConfusionMatrices: React.FC<ConfusionMatricesProps> = ({ open, onClose }) 
               <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200/60">
                 <h3 className="font-semibold text-slate-900 mb-4">Modèles ({matrices.length})</h3>
                 <div className="space-y-3">
-                  {matrices.map((matrix) => (
-                    <button
-                      key={matrix.model}
-                      onClick={() => setSelectedModel(matrix.model)}
-                      className={`w-full text-left p-4 rounded-xl border transition-all duration-200 ${
-                        selectedModel === matrix.model
-                          ? 'bg-white border-indigo-200 shadow-lg shadow-indigo-500/10'
-                          : 'bg-slate-50/50 border-slate-200 hover:bg-white hover:border-slate-300'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-semibold text-slate-900">{matrix.model}</span>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPerformanceColor(matrix.metrics.f1_score)}`}>
-                          F1: {(matrix.metrics.f1_score * 100).toFixed(1)}%
-                        </span>
-                      </div>
-                    </button>
-                  ))}
+                  {matrices.map((matrix) => {
+                    const accuracy = calculateAccuracy(matrix);
+                    return (
+                      <button
+                        key={matrix.model}
+                        onClick={() => setSelectedModel(matrix.model)}
+                        className={`w-full text-left p-4 rounded-xl border transition-all duration-200 ${
+                          selectedModel === matrix.model
+                            ? 'bg-white border-indigo-200 shadow-lg shadow-indigo-500/10'
+                            : 'bg-slate-50/50 border-slate-200 hover:bg-white hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-slate-900">{matrix.model}</span>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPerformanceColor(accuracy)}`}>
+                            Accuracy: {(accuracy * 100).toFixed(1)}%
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -234,7 +208,6 @@ const ConfusionMatrices: React.FC<ConfusionMatricesProps> = ({ open, onClose }) 
                         alt={`Matrice de confusion ${selectedMatrix.model}`}
                         className="max-w-full h-auto rounded-lg shadow-lg border"
                         onError={(e) => {
-                          // Fallback si l'image ne charge pas
                           const target = e.target as HTMLImageElement;
                           target.style.display = 'none';
                           target.nextElementSibling?.classList.remove('hidden');
@@ -279,7 +252,7 @@ const ConfusionMatrices: React.FC<ConfusionMatricesProps> = ({ open, onClose }) 
                   </div>
 
                   {/* Scores de performance */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="text-center p-4 bg-purple-50 rounded-xl border border-purple-200">
                       <div className="text-xl font-bold text-purple-600">
                         {(selectedMatrix.metrics.precision * 100).toFixed(1)}%
@@ -299,6 +272,13 @@ const ConfusionMatrices: React.FC<ConfusionMatricesProps> = ({ open, onClose }) 
                         {(selectedMatrix.metrics.f1_score * 100).toFixed(1)}%
                       </div>
                       <div className="text-sm text-indigo-700 font-medium">F1-Score</div>
+                    </div>
+
+                    <div className="text-center p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+                      <div className="text-xl font-bold text-emerald-600">
+                        {(calculateAccuracy(selectedMatrix) * 100).toFixed(1)}%
+                      </div>
+                      <div className="text-sm text-emerald-700 font-medium">Accuracy</div>
                     </div>
                   </div>
 
@@ -357,7 +337,8 @@ const getFallbackMatrices = (): ConfusionMatrixData[] => [
       true_positives: 45,
       precision: 0.5867,
       recall: 0.579,
-      f1_score: 0.583
+      f1_score: 0.583,
+      accuracy: 0.897
     }
   },
   {
@@ -371,7 +352,8 @@ const getFallbackMatrices = (): ConfusionMatrixData[] => [
       true_positives: 42,
       precision: 0.488,
       recall: 0.592,
-      f1_score: 0.529
+      f1_score: 0.529,
+      accuracy: 0.885
     }
   },
   {
@@ -385,7 +367,8 @@ const getFallbackMatrices = (): ConfusionMatrixData[] => [
       true_positives: 0,
       precision: 0.0,
       recall: 0.0,
-      f1_score: 0.0
+      f1_score: 0.0,
+      accuracy: 0.868
     }
   }
 ];

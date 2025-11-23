@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import React, { useState, useEffect } from 'react';
 import TransactionnelModal, { TransactionResult } from '../components/TransactionModal';
 import AlertsModal from './AlertsModal';
@@ -8,7 +8,7 @@ import DataDistribution from '../components/DataDistribution';
 import AnalyticsModal from '../components/AnalyticsModal';
 import NormalisationStatsModal from '../components/NormalisationStats';
 
-// Interface pour le message flash
+// Interface pour le message flash - CORRIGÉE
 interface FlashMessage {
   id: string;
   type: 'success' | 'warning' | 'error' | 'info';
@@ -16,7 +16,7 @@ interface FlashMessage {
   message: string;
   timestamp: Date;
   transactionResult?: {
-    isFraud: boolean;
+    type: 'transaction' | 'fraude'; // ✅ Changé de isFraud à type
     probability: number;
     transactionData: any;
     prediction: any | null;
@@ -111,16 +111,17 @@ const Dashboard = () => {
                   <div className="flex-1">
                     <h4 className="font-bold text-sm mb-1">{message.title}</h4>
                     <p className="text-sm opacity-90">{message.message}</p>
-{message.transactionResult && (
-  <div className="mt-2 p-2 bg-white/50 rounded-lg">
-    <p className="text-xs font-medium">
-      Statut: {message.transactionResult.isFraud ? 'Fraude' : 'Normal'}
-    </p>
-    <p className="text-xs">
-      Risque: {(message.transactionResult.probability || 0).toFixed(1)}%
-    </p>
-  </div>
-)}
+                    {message.transactionResult && (
+                      <div className="mt-2 p-2 bg-white/50 rounded-lg">
+                        <p className="text-xs font-medium">
+                          {/* ✅ CORRIGÉ : Utiliser type au lieu de isFraud */}
+                          Statut: {message.transactionResult.type === 'fraude' ? 'Fraude' : 'Transaction Normale'}
+                        </p>
+                        <p className="text-xs">
+                          Risque: {(message.transactionResult.probability || 0).toFixed(1)}%
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <button
@@ -151,9 +152,9 @@ const Dashboard = () => {
               </svg>
             </div>
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-br from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <Link href='/dashboard' className="text-2xl font-bold bg-gradient-to-br from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 FraudShield
-              </h1>
+              </Link>
               <p className="text-xs text-slate-500">AI Powered</p>
             </div>
           </div>
@@ -166,7 +167,6 @@ const Dashboard = () => {
               id: 'transactions', 
               name: 'Transactions', 
               icon: '💳', 
-             
               onClick: () => setIsTransactionsModalOpen(true)
             },
             { 
@@ -338,34 +338,38 @@ const Dashboard = () => {
         ></div>
       )}
 
-      {/* Modal des Transactions */}
+      {/* Modal des Transactions - VERSION CORRIGÉE */}
       <TransactionnelModal 
         open={isTransactionsModalOpen}
         onClose={() => setIsTransactionsModalOpen(false)}
         onSave={(transactionResult) => {
-if (transactionResult) {
-  console.log('Transaction sauvegardée:', transactionResult);
-  
-  // Déterminer le type de message basé sur le statut de fraude
-  let messageType: 'success' | 'warning' | 'error' = 'success';
-  let messageTitle = 'Transaction Approuvée';
-  let messageText = 'La transaction a été analysée et approuvée avec succès.';
+          if (transactionResult) {
+            console.log('Transaction sauvegardée:', transactionResult);
+            
+            // ✅ CORRIGÉ : Utiliser transactionResult.type
+            let messageType: 'success' | 'warning' | 'error' = 'success';
+            let messageTitle = 'Transaction Approuvée';
+            let messageText = 'La transaction a été analysée et approuvée avec succès.';
 
-  if (transactionResult.isFraud) {
-    messageType = 'error';
-    messageTitle = 'Fraude Détectée !';
-    messageText = 'Transaction bloquée - Activité suspecte détectée.';
-  }
-  // Note: no needsReview property exists, so this check is removed
+            if (transactionResult.type === 'fraude') {
+              messageType = 'error';
+              messageTitle = 'Fraude Détectée !';
+              messageText = 'Transaction bloquée - Activité suspecte détectée.';
+            }
 
-  // Ajouter le message flash
-  addFlashMessage({
-    type: messageType,
-    title: messageTitle,
-    message: messageText,
-    transactionResult: transactionResult
-  });
-}
+            // Ajouter le message flash
+            addFlashMessage({
+              type: messageType,
+              title: messageTitle,
+              message: messageText,
+              transactionResult: {
+                type: transactionResult.type, // ✅ Utiliser type
+                probability: transactionResult.probability,
+                transactionData: transactionResult.transactionData,
+                prediction: transactionResult.prediction
+              }
+            });
+          }
           
           setIsTransactionsModalOpen(false);
         }}

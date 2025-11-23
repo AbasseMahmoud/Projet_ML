@@ -7,16 +7,16 @@ interface TransactionModalProps {
   onSave: (result?: TransactionResult) => void;
 }
 
-// Interface simplifiée pour la prédiction
+// Interface pour la prédiction
 interface PredictionData {
   prediction: number;
   probability_fraud: number;
 }
 
-// Interface simplifiée pour le résultat
-export interface TransactionResult {
+// Interface pour le résultat
+interface TransactionResult {
   transactionData: any;
-  isFraud: boolean;
+  type: 'transaction' | 'fraude';
   probability: number;
   prediction: PredictionData | null;
 }
@@ -28,7 +28,7 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
   
   if (!open) return null;
 
-  // Fonction de validation des champs (inchangée)
+  // Validation simple - seulement champs obligatoires
   const validateForm = (formData: FormData): Record<string, string> => {
     const newErrors: Record<string, string> = {};
     const requiredFields = [
@@ -41,17 +41,13 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
       const value = formData.get(field) as string | null;
       if (!value || value.trim() === '') {
         newErrors[field] = 'Ce champ est obligatoire';
-      } else if (field === 'transactionAmount' && parseFloat(value) <= 0) {
-        newErrors[field] = 'Le montant doit être supérieur à 0';
-      } else if (field === 'age' && (parseInt(value) < 18 || parseInt(value) > 120)) {
-        newErrors[field] = 'L\'âge doit être entre 18 et 120 ans';
       }
     });
 
     return newErrors;
   };
 
-  // Mapping EXACT selon vos données avec validation (inchangé)
+  // Mapping des données
   const mapToModelFeatures = (formData: any) => {
     const features = {
       Gender: parseInt(formData.gender) || 0,
@@ -69,13 +65,6 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
       TransactionCurrencyCode: parseInt(formData.transactionCurrencyCode) || 0
     };
 
-    // Vérifier qu'aucune valeur n'est NaN
-    Object.keys(features).forEach(key => {
-      if (isNaN((features as any)[key])) {
-        throw new Error(`Valeur invalide pour ${key}`);
-      }
-    });
-
     return features;
   };
 
@@ -91,11 +80,14 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
         headers: { 'Content-Type': 'application/json' }
       });
       
+      console.log('Réponse API:', response.data);
+      
       if (response.data && response.data.success) {
         const predictionData: PredictionData = {
           prediction: response.data.prediction,
           probability_fraud: response.data.probability_fraud
         };
+        
         setPrediction(predictionData);
         return predictionData;
       } else {
@@ -109,14 +101,39 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
     }
   };
 
-  // ✅ FONCTION SIMPLIFIÉE - Retourne seulement si c'est une fraude ou non
-  const checkIfFraud = (predictionData: PredictionData | null): boolean => {
-    if (!predictionData) return false;
+  // ✅ CORRECTION : Seuil à 50% au lieu de 15%
+  // const getTransactionType = (predictionData: PredictionData | null): 'transaction' | 'fraude' => {
+  //   if (!predictionData) return 'transaction';
     
-    // Logique binaire : si prediction = 1 OU probabilité > 50% → FRAUDE
-    const isFraud = predictionData.prediction === 1 || (predictionData.probability_fraud || 0) > 0.5;
-    return isFraud;
-  };
+  //   console.log('🔍 Analyse de la prédiction:', {
+  //     prediction: predictionData.prediction,
+  //     probability_fraud: predictionData.probability_fraud,
+  //     interpretation: predictionData.prediction === 1 ? 'FRAUDE (PotentialFraud=1)' : 'TRANSACTION (PotentialFraud=0)'
+  //   });
+    
+  //   // ✅ CORRECTION : Seuil à 50% pour éviter les faux positifs
+  //   const isFraudByPrediction = predictionData.prediction === 1;
+  //   const isFraudByProbability = predictionData.probability_fraud > 0.50; // Seuil à 50%
+    
+  //   console.log('📊 Décision:', {
+  //     isFraudByPrediction,
+  //     isFraudByProbability,
+  //     finalDecision: (isFraudByPrediction || isFraudByProbability) ? 'FRAUDE' : 'TRANSACTION'
+  //   });
+    
+  //   return (isFraudByPrediction || isFraudByProbability) ? 'fraude' : 'transaction';
+  // };
+
+  const getTransactionType = (predictionData: PredictionData | null): 'transaction' | 'fraude' => {
+  if (!predictionData) return 'transaction';
+
+  const seuil = 0.70;
+
+  const isHighProb = predictionData.probability_fraud >= seuil;
+  const isFraud = predictionData.prediction === 1 && isHighProb;
+
+  return isFraud ? 'fraude' : 'transaction';
+};
 
   // Gestion de la soumission du formulaire
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -134,15 +151,14 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
     
     try {
       const fraudPrediction = await analyzeTransaction(transactionData);
-      const isFraud = checkIfFraud(fraudPrediction);
+      const transactionType = getTransactionType(fraudPrediction);
       
-      // ✅ RÉSULTAT SIMPLIFIÉ : seulement transaction ou fraude
       const transactionResult: TransactionResult = {
         transactionData: {
           ...transactionData,
           analyzedAt: new Date().toISOString()
         },
-        isFraud: isFraud,
+        type: transactionType,
         probability: (fraudPrediction.probability_fraud || 0) * 100,
         prediction: fraudPrediction
       };
@@ -166,8 +182,8 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
     }
   };
 
-  // Composant de champ avec validation (inchangé)
-  const FormField = ({ name, label, type = "number", placeholder, step, min, max }: any) => (
+  // Composant de champ sans validation spécifique
+  const FormField = ({ name, label, type = "text", placeholder }: any) => (
     <div>
       <label className="block text-sm font-medium text-slate-700 mb-2">
         {label} {errors[name] && <span className="text-red-500 text-xs">*</span>}
@@ -175,9 +191,6 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
       <input 
         name={name} 
         type={type}
-        step={step}
-        min={min}
-        max={max}
         placeholder={placeholder} 
         className={`w-full px-4 py-3 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black ${
           errors[name] ? 'border-red-300 bg-red-50' : 'border-slate-200'
@@ -193,8 +206,8 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
     </div>
   );
 
-  // ✅ AFFICHAGE SIMPLIFIÉ du résultat
-  const isFraud = checkIfFraud(prediction);
+  // Détermination du type de transaction
+  const transactionType = getTransactionType(prediction);
   const probability = prediction ? (prediction.probability_fraud * 100) : 0;
 
   return (
@@ -203,8 +216,8 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
         {/* En-tête */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">Formulaire de detection des fraudes</h2>
-            <p className="text-slate-500">Détection de fraude en temps réel</p>
+            <h2 className="text-2xl font-bold text-slate-900">Détection de Fraude</h2>
+            <p className="text-slate-500">Analyse en temps réel : Transaction ou Fraude</p>
           </div>
           <button
             onClick={onClose}
@@ -227,62 +240,58 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
           </div>
         )}
 
-        {/* ✅ RÉSULTAT SIMPLIFIÉ - seulement Transaction ou Fraude */}
+        {/* Résultat */}
         {prediction && (
           <div className={`mb-6 p-6 rounded-2xl border-l-4 ${
-            isFraud 
+            transactionType === 'fraude' 
               ? 'bg-red-50 border-red-500 shadow-lg shadow-red-100' 
               : 'bg-green-50 border-green-500 shadow-lg shadow-green-100'
           }`}>
             <div className="flex items-center space-x-4">
               <div className={`p-3 rounded-full text-2xl ${
-                isFraud ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'
+                transactionType === 'fraude' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'
               }`}>
-                {isFraud ? '🚨' : '✅'}
+                {transactionType === 'fraude' ? '🚨' : '✅'}
               </div>
               <div className="flex-1">
                 <h3 className={`text-xl font-bold mb-2 ${
-                  isFraud ? 'text-red-800' : 'text-green-800'
+                  transactionType === 'fraude' ? 'text-red-800' : 'text-green-800'
                 }`}>
-                  {isFraud ? 'FRAUDE DÉTECTÉE' : 'TRANSACTION VALIDE'}
+                  {transactionType === 'fraude' ? 'FRAUDE DÉTECTÉE' : 'TRANSACTION NORMALE'}
                 </h3>
                 <p className={`text-lg font-semibold mb-1 ${
-                  isFraud ? 'text-red-700' : 'text-green-700'
+                  transactionType === 'fraude' ? 'text-red-700' : 'text-green-700'
                 }`}>
-                  {isFraud 
-                    ? 'Transaction suspecte - Intervention requise' 
-                    : 'Transaction sécurisée - Aucun problème détecté'
+                  {transactionType === 'fraude' 
+                    ? `Transaction suspecte (${probability.toFixed(1)}% risque)` 
+                    : 'Transaction légitime - Aucun problème détecté'
                   }
                 </p>
                 <div className="grid grid-cols-2 gap-4 mt-3">
                   <div>
                     <p className="text-sm text-slate-600">Probabilité de fraude</p>
                     <p className={`text-lg font-bold ${
-                      isFraud ? 'text-red-700' : 'text-green-700'
+                      transactionType === 'fraude' ? 'text-red-700' : 'text-green-700'
                     }`}>
                       {probability.toFixed(1)}%
                     </p>
                   </div>
-                  <div>
-                    <p className="text-sm text-slate-600">Statut</p>
-                    <p className={`text-lg font-bold ${
-                      isFraud ? 'text-red-700' : 'text-green-700'
-                    }`}>
-                      {isFraud ? 'FRAUDE' : 'NORMAL'}
-                    </p>
-                  </div>
+                </div>
+                <div className="mt-3 p-2 bg-slate-100 rounded-lg">
+                  <p className="text-xs text-slate-600">
+                    Probabilité: {(prediction.probability_fraud * 100).toFixed(1)}%
+                  </p>
                 </div>
               </div>
             </div>
             
             {/* Message d'alerte seulement pour les fraudes */}
-            {isFraud && (
+            {transactionType === 'fraude' && (
               <div className="mt-4 p-3 bg-red-100 border border-red-300 rounded-lg">
                 <div className="flex items-center space-x-2">
                   <span className="text-red-600">🚨</span>
                   <p className="font-medium text-sm text-red-700">
-                    Alerte : Cette transaction présente des caractéristiques suspectes. 
-                    Recommandation : Intervention immédiate requise.
+                    Alerte : Transaction bloquée pour suspicion de fraude
                   </p>
                 </div>
               </div>
@@ -290,8 +299,7 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
           </div>
         )}
 
-        {/* commentaire  */}
-        {/* Formulaire (inchangé) */}
+        {/* Formulaire sans validations spécifiques */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Section Informations Client */}
           <div className="space-y-4">
@@ -302,15 +310,11 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
                 name="gender"
                 label="Gender"
                 placeholder="0"
-                min="0"
-                max="1"
               />
               <FormField 
                 name="age"
                 label="Age"
                 placeholder="56"
-                min="18"
-                max="120"
               />
             </div>
 
@@ -319,13 +323,11 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
                 name="houseTypeID"
                 label="House Type ID"
                 placeholder="1"
-                min="0"
               />
               <FormField 
                 name="contactAvaliabilityID"
                 label="Contact Availability ID"
                 placeholder="0"
-                min="0"
               />
             </div>
           </div>
@@ -339,13 +341,11 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
                 name="homeCountry"
                 label="Home Country"
                 placeholder="1"
-                min="0"
               />
               <FormField 
                 name="transactionCountry"
                 label="Transaction Country"
                 placeholder="1"
-                min="0"
               />
             </div>
           </div>
@@ -359,13 +359,11 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
                 name="accountNo"
                 label="Account No"
                 placeholder="1109976"
-                min="0"
               />
               <FormField 
                 name="cardExpiryDate"
                 label="Card Expiry Date"
                 placeholder="1811"
-                min="0"
               />
             </div>
 
@@ -373,16 +371,13 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
               <FormField 
                 name="transactionAmount"
                 label="Transaction Amount"
-                type="number"
-                step="0.0001"
-                placeholder="0.0062"
-                min="0.0001"
+                type="text"
+                placeholder="0.0034"
               />
               <FormField 
                 name="productID"
                 label="Product ID"
                 placeholder="3"
-                min="0"
               />
             </div>
 
@@ -391,13 +386,11 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
                 name="cif"
                 label="CIF"
                 placeholder="11020290"
-                min="0"
               />
               <FormField 
                 name="transactionCurrencyCode"
                 label="Currency Code"
                 placeholder="1"
-                min="0"
               />
             </div>
           </div>

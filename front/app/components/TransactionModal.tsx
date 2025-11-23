@@ -247,6 +247,7 @@ const TransactionnelModal: React.FC<TransactionModalProps> = ({ open, onClose, o
               ? 'bg-red-50 border-red-500 shadow-lg shadow-red-100' 
               : 'bg-green-50 border-green-500 shadow-lg shadow-green-100'
           }`}>
+            
             <div className="flex items-center space-x-4">
               <div className={`p-3 rounded-full text-2xl ${
                 transactionType === 'fraude' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'

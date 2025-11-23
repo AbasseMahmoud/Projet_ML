@@ -1968,29 +1968,61 @@ def verifier_coherence_features(X_train_res, X_test):
     print("✅ Features cohérentes")
     return True
 
+# def appliquer_smote(X_train, Y_train, random_state=42):
+#     print("\nCorrection du déséquilibre avec SMOTE...")
+
+#     x_numerique = X_train.select_dtypes(include=['number'])
+
+#     smote = SMOTE(
+#         sampling_strategy=0.3,
+#         random_state=random_state
+#     )
+    
+#     x_train_res, y_train_res = smote.fit_resample(x_numerique, Y_train)
+
+#     print("\nDistribution après SMOTE (train) :")
+#     print(pd.Series(y_train_res).value_counts())
+    
+#     fraud_ratio_before = (Y_train.sum() / len(Y_train)) * 100
+#     fraud_ratio_after = (y_train_res.sum() / len(y_train_res)) * 100
+    
+#     print(f"\nRatio fraude avant : {fraud_ratio_before:.1f}%")
+#     print(f"Ratio fraude après : {fraud_ratio_after:.1f}%")
+#     print(f"Échantillons fraudes générés : {y_train_res.sum() - Y_train.sum()}")
+
+#     return x_train_res, y_train_res
+from imblearn.over_sampling import SMOTENC
+
 def appliquer_smote(X_train, Y_train, random_state=42):
-    print("\nCorrection du déséquilibre avec SMOTE...")
+    print("\nCorrection du déséquilibre avec SMOTENC...")
 
-    x_numerique = X_train.select_dtypes(include=['number'])
-
-    smote = SMOTE(
-        sampling_strategy=0.3,
+    # Identifier les colonnes catégorielles
+    categorical_cols = ['Gender', 'HomeCountry', 'TransactionCountry', 'LargePurchase', 'TransactionCurrencyCode']
+    
+    # Obtenir les indices des colonnes catégorielles pour SMOTENC
+    categorical_features = [X_train.columns.get_loc(c) for c in categorical_cols if c in X_train.columns]
+    
+    smote_nc = SMOTENC(
+        categorical_features=categorical_features,
+        sampling_strategy=0.5,
         random_state=random_state
     )
     
-    x_train_res, y_train_res = smote.fit_resample(x_numerique, Y_train)
+    # Appliquer SMOTENC sur toutes les colonnes (numériques + catégorielles)
+    X_train_res, Y_train_res = smote_nc.fit_resample(X_train, Y_train)
 
     print("\nDistribution après SMOTE (train) :")
-    print(pd.Series(y_train_res).value_counts())
+    print(pd.Series(Y_train_res).value_counts())
     
     fraud_ratio_before = (Y_train.sum() / len(Y_train)) * 100
-    fraud_ratio_after = (y_train_res.sum() / len(y_train_res)) * 100
+    fraud_ratio_after = (Y_train_res.sum() / len(Y_train_res)) * 100
     
     print(f"\nRatio fraude avant : {fraud_ratio_before:.1f}%")
     print(f"Ratio fraude après : {fraud_ratio_after:.1f}%")
-    print(f"Échantillons fraudes générés : {y_train_res.sum() - Y_train.sum()}")
+    print(f"Échantillons fraudes générés : {Y_train_res.sum() - Y_train.sum()}")
 
-    return x_train_res, y_train_res
+    return X_train_res, Y_train_res
+
 
 def appliquer_normalisation(X_train_res, X_test):
     # CORRECTION : Retirer 'PotentialFraud' qui n'existe pas dans X_train_res
@@ -2378,6 +2410,8 @@ def get_normalisation_stats(X_train_res, X_train_norm):
             'details_colonnes': {},
             'details_techniques': {'type_normaliseur': 'StandardScaler', 'algorithme': 'Standardisation', 'colonnes_normalisees': 0, 'taille_entrainement': 0, 'nombre_features': 0}
         }
+
+# Ajout la nuit 
 def corriger_biais_montant(pf):
     """Réduit le biais des montants très bas"""
     pf_corrige = pf.copy()
@@ -2409,6 +2443,8 @@ def corriger_biais_montant(pf):
 # PIPELINE PRINCIPAL CORRIGÉ
 # 1. Chargement et vérification données
 pf = train_model()
+
+# Ajout la nuit 
 print("\n🔧 CORRECTION DU BIAIS DES MONTANTS...")
 pf = corriger_biais_montant(pf)
 # ✅ AJOUTEZ CES LIGNES DE DIAGNOSTIC ICI :

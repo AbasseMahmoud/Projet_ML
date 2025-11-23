@@ -1063,33 +1063,114 @@ def generate_confusion_matrix_image(matrix, model_name):
         return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
 
 # Dans votre fichier Flask, ajoutez cette route
+# @bp.route('/data-distribution', methods=['GET'])
+# def get_data_distribution():
+#     try:
+#         print("Début de get_data_distribution...")
+        
+#         import pandas as pd
+        
+#         # Chargez vos données
+#         pf = train_model()
+#         print(f" Données chargées, shape: {pf.shape}")
+        
+#         # Distribution avant SMOTE
+#         y_original = pf['PotentialFraud']
+#         before_counts = y_original.value_counts()
+#         print(f" Distribution avant SMOTE: {dict(before_counts)}")
+        
+#         # Appliquez SMOTE
+#         X_train, X_test, Y_train, Y_test = preparer_donnees(pf)
+
+#         print("Données préparées pour SMOTE")
+        
+#         X_train_res, Y_train_res = appliquer_smote(X_train, Y_train)
+#         print("SMOTE appliqué")
+        
+#         # Distribution après SMOTE
+#         after_counts = pd.Series(Y_train_res).value_counts()
+#         print(f"Distribution après SMOTE: {dict(after_counts)}")
+        
+#         distribution_data = {
+#             'before_smote': {
+#                 'non_fraud': int(before_counts.get(0, 0)),
+#                 'fraud': int(before_counts.get(1, 0))
+#             },
+#             'after_smote': {
+#                 'non_fraud': int(after_counts.get(0, 0)),
+#                 'fraud': int(after_counts.get(1, 0))
+#             },
+#             'total_before': int(before_counts.sum()),
+#             'total_after': int(after_counts.sum()),
+#             'source': 'flask_dynamic',
+#             'fetchedAt': pd.Timestamp.now().isoformat()
+#         }
+        
+#         print("🎉 Données SMOTE générées avec succès")
+#         return jsonify(distribution_data)
+        
+#     except Exception as e:
+#         print(f"Erreur data-distribution: {str(e)}")
+#         import traceback
+#         print(f" Stack trace: {traceback.format_exc()}")
+        
+#         # Données de secours
+#         fallback_data = {
+#             'before_smote': {
+#                 'non_fraud': 776,
+#                 'fraud': 103
+#             },
+#             'after_smote': {
+#                 'non_fraud': 776,
+#                 'fraud': 232
+#             },
+#             'total_before': 879,
+#             'total_after': 1008,
+#             'source': 'fallback',
+#             'fetchedAt': pd.Timestamp.now().isoformat()
+#         }
+#         return jsonify(fallback_data)
 @bp.route('/data-distribution', methods=['GET'])
 def get_data_distribution():
     try:
         print("Début de get_data_distribution...")
         
         import pandas as pd
+        import os
         
-        # Chargez vos données
-        pf = train_model()
+        # Chargez les données directement sans relancer l'entraînement
+        data_path = os.path.join('data', 'dataset.csv')
+        pf = pd.read_csv(data_path)
         print(f" Données chargées, shape: {pf.shape}")
         
-        # Distribution avant SMOTE
+        # Distribution avant SMOTE - utilisez tout le dataset
         y_original = pf['PotentialFraud']
         before_counts = y_original.value_counts()
-        print(f" Distribution avant SMOTE: {dict(before_counts)}")
+        print(f" Distribution originale: {dict(before_counts)}")
         
-        # Appliquez SMOTE
-        X_train, X_test, Y_train, Y_test = preparer_donnees(pf)
-
-        print("Données préparées pour SMOTE")
+        # Pour la distribution après SMOTE, utilisez les mêmes calculs que dans votre entraînement
+        # mais sans relancer tout le processus
+        from sklearn.model_selection import train_test_split
         
-        X_train_res, Y_train_res = appliquer_smote(X_train, Y_train)
-        print("SMOTE appliqué")
+        # Préparation basique des données
+        X = pf.drop('PotentialFraud', axis=1)
+        y = pf['PotentialFraud']
         
-        # Distribution après SMOTE
+        # Séparation train/test (même ratio que dans votre code)
+        X_train, X_test, Y_train, Y_test = train_test_split(
+            X, y, test_size=0.3, random_state=42, stratify=y
+        )
+        
+        print(f"Train distribution avant SMOTE: {Y_train.value_counts().to_dict()}")
+        
+        # Appliquez SMOTE seulement sur les données d'entraînement
+        from imblearn.over_sampling import SMOTE
+        
+        smote = SMOTE(random_state=42)
+        X_train_res, Y_train_res = smote.fit_resample(X_train, Y_train)
+        
         after_counts = pd.Series(Y_train_res).value_counts()
-        print(f"Distribution après SMOTE: {dict(after_counts)}")
+        print(f"Train distribution après SMOTE: {dict(after_counts)}")
         
         distribution_data = {
             'before_smote': {
@@ -1103,7 +1184,13 @@ def get_data_distribution():
             'total_before': int(before_counts.sum()),
             'total_after': int(after_counts.sum()),
             'source': 'flask_dynamic',
-            'fetchedAt': pd.Timestamp.now().isoformat()
+            'fetchedAt': pd.Timestamp.now().isoformat(),
+            'details': {
+                'dataset_total': len(pf),
+                'train_size': len(Y_train),
+                'test_size': len(Y_test),
+                'smote_samples_generated': int(after_counts.get(1, 0) - Y_train.value_counts().get(1, 0))
+            }
         }
         
         print("🎉 Données SMOTE générées avec succès")
@@ -1114,7 +1201,7 @@ def get_data_distribution():
         import traceback
         print(f" Stack trace: {traceback.format_exc()}")
         
-        # Données de secours
+        # Données de secours basées sur votre sortie console
         fallback_data = {
             'before_smote': {
                 'non_fraud': 776,
@@ -1127,10 +1214,10 @@ def get_data_distribution():
             'total_before': 879,
             'total_after': 1008,
             'source': 'fallback',
-            'fetchedAt': pd.Timestamp.now().isoformat()
+            'fetchedAt': pd.Timestamp.now().isoformat(),
+            'error': str(e)
         }
         return jsonify(fallback_data)
-
 @bp.route('/data-quality', methods=['GET'])
 def get_data_quality():
     try:

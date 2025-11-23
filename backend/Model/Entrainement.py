@@ -2412,41 +2412,41 @@ def get_normalisation_stats(X_train_res, X_train_norm):
         }
 
 # Ajout la nuit 
-def corriger_biais_montant(pf):
-    """Réduit le biais des montants très bas"""
-    pf_corrige = pf.copy()
+# def corriger_biais_montant(pf):
+#     """Réduit le biais des montants très bas"""
+#     pf_corrige = pf.copy()
     
-    # ANALYSE : Calculer la vraie distribution
-    montant_fraudes = pf_corrige[pf_corrige['PotentialFraud'] == 1]['TransactionAmount']
-    montant_normales = pf_corrige[pf_corrige['PotentialFraud'] == 0]['TransactionAmount']
+#     # ANALYSE : Calculer la vraie distribution
+#     montant_fraudes = pf_corrige[pf_corrige['PotentialFraud'] == 1]['TransactionAmount']
+#     montant_normales = pf_corrige[pf_corrige['PotentialFraud'] == 0]['TransactionAmount']
     
-    print(f"📊 AVANT correction:")
-    print(f"  - Fraudes avec montant < 0.01: {len(montant_fraudes[montant_fraudes < 0.01])}/{len(montant_fraudes)}")
-    print(f"  - Normales avec montant < 0.01: {len(montant_normales[montant_normales < 0.01])}/{len(montant_normales)}")
+#     print(f"📊 AVANT correction:")
+#     print(f"  - Fraudes avec montant < 0.01: {len(montant_fraudes[montant_fraudes < 0.01])}/{len(montant_fraudes)}")
+#     print(f"  - Normales avec montant < 0.01: {len(montant_normales[montant_normales < 0.01])}/{len(montant_normales)}")
     
-    # OPTION 1: Supprimer certaines fraudes avec montant très bas
-    mask_fraudes_montant_bas = (pf_corrige['PotentialFraud'] == 1) & (pf_corrige['TransactionAmount'] < 0.01)
-    indices_a_supprimer = mask_fraudes_montant_bas.sample(frac=0.5).index  # Supprime 50%
-    pf_corrige = pf_corrige.drop(indices_a_supprimer)
+#     # OPTION 1: Supprimer certaines fraudes avec montant très bas
+#     mask_fraudes_montant_bas = (pf_corrige['PotentialFraud'] == 1) & (pf_corrige['TransactionAmount'] < 0.01)
+#     indices_a_supprimer = mask_fraudes_montant_bas.sample(frac=0.5).index  # Supprime 50%
+#     pf_corrige = pf_corrige.drop(indices_a_supprimer)
     
-    # OPTION 2: Ajuster certains montants très bas
-    mask_montant_zero = pf_corrige['TransactionAmount'] < 0.001
-    pf_corrige.loc[mask_montant_zero, 'TransactionAmount'] = 1.0  # Met à 1.0 au lieu de 0
+#     # OPTION 2: Ajuster certains montants très bas
+#     mask_montant_zero = pf_corrige['TransactionAmount'] < 0.001
+#     pf_corrige.loc[mask_montant_zero, 'TransactionAmount'] = 1.0  # Met à 1.0 au lieu de 0
     
-    print(f"📊 APRÈS correction:")
-    montant_fraudes_apres = pf_corrige[pf_corrige['PotentialFraud'] == 1]['TransactionAmount']
-    montant_normales_apres = pf_corrige[pf_corrige['PotentialFraud'] == 0]['TransactionAmount']
-    print(f"  - Fraudes avec montant < 0.01: {len(montant_fraudes_apres[montant_fraudes_apres < 0.01])}/{len(montant_fraudes_apres)}")
-    print(f"  - Normales avec montant < 0.01: {len(montant_normales_apres[montant_normales_apres < 0.01])}/{len(montant_normales_apres)}")
+#     print(f"📊 APRÈS correction:")
+#     montant_fraudes_apres = pf_corrige[pf_corrige['PotentialFraud'] == 1]['TransactionAmount']
+#     montant_normales_apres = pf_corrige[pf_corrige['PotentialFraud'] == 0]['TransactionAmount']
+#     print(f"  - Fraudes avec montant < 0.01: {len(montant_fraudes_apres[montant_fraudes_apres < 0.01])}/{len(montant_fraudes_apres)}")
+#     print(f"  - Normales avec montant < 0.01: {len(montant_normales_apres[montant_normales_apres < 0.01])}/{len(montant_normales_apres)}")
     
-    return pf_corrige    
+#     return pf_corrige    
 # PIPELINE PRINCIPAL CORRIGÉ
 # 1. Chargement et vérification données
 pf = train_model()
 
 # Ajout la nuit 
 print("\n🔧 CORRECTION DU BIAIS DES MONTANTS...")
-pf = corriger_biais_montant(pf)
+# pf = corriger_biais_montant(pf)
 # ✅ AJOUTEZ CES LIGNES DE DIAGNOSTIC ICI :
 print("\n" + "="*60)
 print("🔍 DIAGNOSTIC DES PATTERNS DE FRAUDE")

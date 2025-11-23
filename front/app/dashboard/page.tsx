@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import React, { useState, useEffect } from 'react';
-import TransactionnelModal, { TransactionResult } from '../components/TransactionModal';
+import TransactionnelModal from '../components/TransactionModal';
 import AlertsModal from './AlertsModal';
 import ConfusionMatrices from '../components/ConfusionMatrices';
 import DataDistribution from '../components/DataDistribution';

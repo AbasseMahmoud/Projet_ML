@@ -30,27 +30,100 @@ bp = Blueprint('main', __name__, url_prefix='/api')
 # 👇 Ajoutez cette route OPTIONS spécifique pour /predict
 
 
+# @bp.route('/register', methods=['POST'])
+# def register():
+#     data = request.get_json()
+
+#     # Vérifier les champs
+#     if not data or not data.get('username') or not data.get('password'):
+#         return jsonify({'message': 'Champs manquants'}), 400
+
+#     # Vérifier si l'utilisateur existe déjà
+#     if User.query.filter_by(username=data['username']).first():
+#         return jsonify({'message': 'Nom d’utilisateur déjà utilisé'}), 400
+
+#     # Créer l’utilisateur
+#     user = User(username=data['username'])
+#     user.set_password(data['password'])  # hash du mot de passe
+#     db.session.add(user)
+#     db.session.commit()
+
+#     return jsonify({'message': 'Utilisateur enregistré avec succès !'}), 201
+
 @bp.route('/register', methods=['POST'])
 def register():
-    data = request.get_json()
+    try:
+        data = request.get_json()
+        
+        print("📨 Données reçues:", data)
 
-    # Vérifier les champs
-    if not data or not data.get('username') or not data.get('password'):
-        return jsonify({'message': 'Champs manquants'}), 400
+        if not data:
+            return jsonify({
+                "success": False,
+                "error": "Aucune donnée reçue"
+            }), 400
 
-    # Vérifier si l'utilisateur existe déjà
-    if User.query.filter_by(username=data['username']).first():
-        return jsonify({'message': 'Nom d’utilisateur déjà utilisé'}), 400
+        # ✅ Variables en snake_case (convention Python)
+        email = data.get('email', '').strip()
+        password = data.get('password', '')
+        first_name = data.get('firstName', '').strip()  # ✅ firstName → first_name
+        last_name = data.get('lastName', '').strip()    # ✅ lastName → last_name
+        confirm_password = data.get('confirmPassword', '')  # ✅ confirmPassword → confirm_password
+        accept_terms = data.get('acceptTerms', False)   # ✅ acceptTerms → accept_terms
 
-    # Créer l’utilisateur
-    user = User(username=data['username'])
-    user.set_password(data['password'])  # hash du mot de passe
-    db.session.add(user)
-    db.session.commit()
+        # Validations
+        if not email:
+            return jsonify({"success": False, "error": "L'email est requis"}), 400
+        if not password:
+            return jsonify({"success": False, "error": "Le mot de passe est requis"}), 400
+        if not first_name or not last_name:
+            return jsonify({"success": False, "error": "Le prénom et le nom sont requis"}), 400
+        if '@' not in email or '.' not in email:
+            return jsonify({"success": False, "error": "Format d'email invalide"}), 400
+        if len(password) < 6:
+            return jsonify({"success": False, "error": "Le mot de passe doit contenir au moins 6 caractères"}), 400
+        if password != confirm_password:
+            return jsonify({"success": False, "error": "Les mots de passe ne correspondent pas"}), 400
+        if not accept_terms:
+            return jsonify({"success": False, "error": "Vous devez accepter les conditions d'utilisation"}), 400
 
-    return jsonify({'message': 'Utilisateur enregistré avec succès !'}), 201
+        # Vérifier si l'utilisateur existe déjà
+        existing_user = User.query.filter_by(username=email).first()
+        if existing_user:
+            return jsonify({
+                "success": False,
+                "error": "Un compte avec cet email existe déjà"
+            }), 400
 
+        # Créer le nouvel utilisateur
+        new_user = User(username=email)
+        new_user.set_password(password)
+        
+        db.session.add(new_user)
+        db.session.commit()
 
+        print(f"✅ Nouvel utilisateur créé: {email} (ID: {new_user.id})")
+
+        return jsonify({
+            "success": True,
+            "message": "Compte créé avec succès !",
+            "user": {
+                "id": new_user.id,
+                "email": new_user.username,
+                "first_name": first_name,        # ✅ snake_case
+                "last_name": last_name,          # ✅ snake_case
+                "full_name": f"{first_name} {last_name}",  # ✅ snake_case
+                "created_at": new_user.created_at.isoformat()
+            }
+        }), 201
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"❌ Erreur inscription: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": "Erreur lors de la création du compte"
+        }), 500
 @bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()

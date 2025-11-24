@@ -46,6 +46,51 @@ const Dashboard = () => {
   const [userName, setUserName] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
+  // Vérifier si l'utilisateur est connecté - version ULTIME
+useEffect(() => {
+  let isMounted = true;
+
+  const checkAuth = () => {
+    if (!isMounted) return false;
+    
+    const isLoggedIn = localStorage.getItem("fraud_is_logged_in");
+    const userEmail = localStorage.getItem("fraud_user_email");
+    
+    if (isLoggedIn !== "true" || !userEmail) {
+      // Nettoyer complètement
+      localStorage.removeItem("fraud_is_logged_in");
+      localStorage.removeItem("fraud_user_email");
+      localStorage.removeItem("fraud_user_name");
+      
+      // Rediriger immédiatement sans possibilité de retour
+      window.location.href = "/login";
+      return false;
+    }
+    return true;
+  };
+
+  // Vérifier immédiatement
+  checkAuth();
+
+  // EMPÊCHER COMPLÈTEMENT LE RETOUR
+  const handlePopState = (event: PopStateEvent) => {
+    if (!checkAuth()) {
+      // Empêcher la navigation
+      event.preventDefault();
+      window.history.pushState(null, "", window.location.href);
+    }
+  };
+
+  // Bloquer l'historique
+  window.history.pushState(null, "", window.location.href);
+  
+  window.addEventListener('popstate', handlePopState);
+
+  return () => {
+    isMounted = false;
+    window.removeEventListener('popstate', handlePopState);
+  };
+}, [router]);
   // Récupérer les infos depuis localStorage
   useEffect(() => {
     const storedName = localStorage.getItem("fraud_user_name");

@@ -52,7 +52,7 @@ def create_app():
         "http://localhost:3001",
         "http://localhost:5173", 
         "https://front-bd66.onrender.com",
-        'https://projet-deep-learning.vercel.app/'
+        "https://projet-deep-learning.vercel.app/"
     ])
 
     # ACTIVER LA BASE DE DONNEES

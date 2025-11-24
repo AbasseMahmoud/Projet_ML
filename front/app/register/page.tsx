@@ -1,31 +1,90 @@
 "use client";
-import Link from 'next/link';
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import Link from "next/link";
+import React, { useState, ChangeEvent, FormEvent } from "react";
+import { useRouter } from "next/navigation";
 
 const Page = () => {
+  const router = useRouter();
+
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    acceptTerms: false
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    acceptTerms: false,
   });
 
-  // Correction : Typage explicite du paramètre e
+  const [message, setMessage] = useState<string | null>(null);
+  const [messageType, setMessageType] = useState<"success" | "error" | null>(
+    null
+  );
+  const [loading, setLoading] = useState(false);
+
+  // Gestion des champs
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
-  // Correction : Typage explicite pour la soumission du formulaire
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  // Soumission du formulaire → appel API Flask
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('Données du formulaire:', formData);
-    // Ici vous ajouterez la logique de soumission
+    setMessage(null);
+    setMessageType(null);
+
+    if (formData.password !== formData.confirmPassword) {
+      setMessageType("error");
+      setMessage("Les mots de passe ne correspondent pas.");
+      return;
+    }
+
+    if (!formData.acceptTerms) {
+      setMessageType("error");
+      setMessage("Vous devez accepter les conditions d'utilisation.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch("http://127.0.0.1:5000/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        // ✅ On garde le vrai nom + email en local pour le dashboard
+        const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+        localStorage.setItem("fraud_user_name", fullName);
+        localStorage.setItem("fraud_user_email", formData.email);
+
+        setMessageType("success");
+        setMessage(data.message || "Inscription réussie !");
+
+        // 🔁 Redirection vers la page de connexion
+        router.push("/login");
+      } else {
+        setMessageType("error");
+        setMessage(data.message || "Erreur lors de l'inscription.");
+      }
+    } catch (err) {
+      console.error(err);
+      setMessageType("error");
+      setMessage("Erreur de connexion au serveur.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -35,14 +94,28 @@ const Page = () => {
         <div className="text-center mb-12">
           <div className="flex justify-center items-center mb-6">
             <div className="w-12 h-12 bg-indigo-600 rounded-lg flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-8 w-8 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
               </svg>
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Rejoignez FraudDetect AI</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Rejoignez FraudDetect AI
+          </h1>
           <p className="text-lg text-gray-600 max-w-md mx-auto">
-            Créez votre compte pour accéder à notre solution de détection de fraude bancaire par IA
+            Créez votre compte pour accéder à notre solution de détection de
+            fraude bancaire par IA
           </p>
         </div>
 
@@ -52,7 +125,10 @@ const Page = () => {
             {/* Nom et Prénom */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="firstName"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Prénom *
                 </label>
                 <input
@@ -67,7 +143,10 @@ const Page = () => {
                 />
               </div>
               <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="lastName"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Nom *
                 </label>
                 <input
@@ -85,7 +164,10 @@ const Page = () => {
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Email professionnel *
               </label>
               <input
@@ -103,7 +185,10 @@ const Page = () => {
             {/* Mot de passe */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Mot de passe *
                 </label>
                 <input
@@ -121,7 +206,10 @@ const Page = () => {
                 </p>
               </div>
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Confirmer le mot de passe *
                 </label>
                 <input
@@ -149,14 +237,20 @@ const Page = () => {
                 className="mt-1 w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
               />
               <label htmlFor="acceptTerms" className="text-sm text-gray-600">
-                J'accepte les{' '}
-                <Link href="#" className="text-indigo-600 hover:text-indigo-500 font-medium">
+                J'accepte les{" "}
+                <Link
+                  href="#"
+                  className="text-indigo-600 hover:text-indigo-500 font-medium"
+                >
                   conditions d'utilisation
-                </Link>{' '}
-                et la{' '}
-                <Link href="#" className="text-indigo-600 hover:text-indigo-500 font-medium">
+                </Link>{" "}
+                et la{" "}
+                <Link
+                  href="#"
+                  className="text-indigo-600 hover:text-indigo-500 font-medium"
+                >
                   politique de confidentialité
-                </Link>{' '}
+                </Link>{" "}
                 *
               </label>
             </div>
@@ -164,45 +258,36 @@ const Page = () => {
             {/* Bouton de soumission */}
             <button
               type="submit"
-              className="w-full bg-indigo-600 text-white py-4 px-6 rounded-lg font-semibold text-lg hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-200 shadow-lg"
+              disabled={loading}
+              className="w-full bg-indigo-600 text-white py-4 px-6 rounded-lg font-semibold text-lg hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-200 shadow-lg disabled:opacity-60"
             >
-              Créer mon compte
+              {loading ? "Création du compte..." : "Créer mon compte"}
             </button>
 
+            {/* Message retour API */}
+            {message && (
+              <p
+                className={`text-center text-sm mt-2 ${
+                  messageType === "success" ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                {message}
+              </p>
+            )}
+
             {/* Lien de connexion */}
-            <div className="text-center">
+            <div className="text-center mt-4">
               <p className="text-gray-600">
-                Déjà un compte ?{' '}
-                <Link href="/login" className="text-indigo-600 hover:text-indigo-500 font-semibold">
+                Déjà un compte ?{" "}
+                <Link
+                  href="/login"
+                  className="text-indigo-600 hover:text-indigo-500 font-semibold"
+                >
                   Se connecter
                 </Link>
               </p>
             </div>
           </form>
-        </div>
-
-        {/* Informations supplémentaires */}
-        <div className="mt-8 text-center">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-gray-600">
-            <div className="flex items-center justify-center space-x-2">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-              <span>Sécurité bancaire de niveau enterprise</span>
-            </div>
-            <div className="flex items-center justify-center space-x-2">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              <span>Détection en temps réel</span>
-            </div>
-            <div className="flex items-center justify-center space-x-2">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-              </svg>
-              <span>Support 24/7</span>
-            </div>
-          </div>
         </div>
       </div>
     </div>

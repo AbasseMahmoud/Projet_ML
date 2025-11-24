@@ -35,17 +35,10 @@ const Navbar = () => {
                             <div className="absolute inset-0 bg-white/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </Link>
                         <Link
-                            href="/login"
+                            href="/register"
                             className="relative px-4 py-2 text-white/90 hover:text-white font-medium text-lg rounded-lg transition-all duration-300 hover:bg-white/10 group"
                         >
                             <span className="relative z-10">Se connecter</span>
-                            <div className="absolute inset-0 bg-white/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        </Link>
-                        <Link
-                            href="/dashboard"
-                            className="relative px-4 py-2 text-white/90 hover:text-white font-medium text-lg rounded-lg transition-all duration-300 hover:bg-white/10 group"
-                        >
-                            <span className="relative z-10">Dashboard</span>
                             <div className="absolute inset-0 bg-white/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </Link>
                         <Link
@@ -89,7 +82,7 @@ const Navbar = () => {
                                 </div>
                             </Link>
                             <Link
-                                href="/login"
+                                href="/register"
                                 className="px-4 py-3 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 font-medium"
                                 onClick={() => setIsOpen(false)}
                             >

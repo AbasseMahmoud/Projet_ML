@@ -113,7 +113,7 @@ def register():
                 "first_name": first_name,        # ✅ snake_case
                 "last_name": last_name,          # ✅ snake_case
                 "full_name": f"{first_name} {last_name}",  # ✅ snake_case
-                "created_at": new_user.created_at.isoformat()
+                # "created_at": new_user.created_at.isoformat()
             }
         }), 201
 

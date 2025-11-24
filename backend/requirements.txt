@@ -15,7 +15,9 @@ pandas>=2.2.0
 imbalanced-learn>=0.12.0
 joblib>=1.4.0
 threadpoolctl>=3.5.0
-matplotlib>=3.7.0           # ← AJOUTEZ CECI
+matplotlib>=3.7.0       
+seaborn==0.13.0           # ← AJOUTEZ CECI
+plotly==5.17.0    # ← AJOUTEZ CECI
 scikit-learn>=1.3.0         # ← PROBABLEMENT NÉCESSAIRE AUSSI
 numpy>=1.24.0               # ← PROBABLEMENT NÉCESSAIRE AUSSI
 scipy>=1.11.0               # ← PROBABLEMENT NÉCESSAIRE AUSSI

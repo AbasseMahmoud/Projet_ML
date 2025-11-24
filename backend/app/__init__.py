@@ -49,6 +49,7 @@ def create_app():
     # Configuration CORS
     CORS(app, origins=[
         "http://localhost:3000",
+        "http://localhost:3001",
         "http://localhost:5173", 
         "https://front-bd66.onrender.com"
     ])

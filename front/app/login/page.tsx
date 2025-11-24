@@ -147,7 +147,7 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold text-lg hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-200 shadow-lg disabled:opacity-60"
+              className="w-full bg-indigo-600 text-white py-3 px-6 rounded-lg cursor-pointer font-semibold text-lg hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-200 shadow-lg disabled:opacity-60"
             >
               {loading ? "Connexion..." : "Se connecter"}
             </button>

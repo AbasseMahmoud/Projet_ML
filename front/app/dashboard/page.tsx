@@ -46,51 +46,52 @@ const Dashboard = () => {
   const [userName, setUserName] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   // Vérifier si l'utilisateur est connecté - version ULTIME
-useEffect(() => {
-  let isMounted = true;
+  useEffect(() => {
+    let isMounted = true;
 
-  const checkAuth = () => {
-    if (!isMounted) return false;
-    
-    const isLoggedIn = localStorage.getItem("fraud_is_logged_in");
-    const userEmail = localStorage.getItem("fraud_user_email");
-    
-    if (isLoggedIn !== "true" || !userEmail) {
-      // Nettoyer complètement
-      localStorage.removeItem("fraud_is_logged_in");
-      localStorage.removeItem("fraud_user_email");
-      localStorage.removeItem("fraud_user_name");
-      
-      // Rediriger immédiatement sans possibilité de retour
-      window.location.href = "/login";
-      return false;
-    }
-    return true;
-  };
+    const checkAuth = () => {
+      if (!isMounted) return false;
 
-  // Vérifier immédiatement
-  checkAuth();
+      const isLoggedIn = localStorage.getItem("fraud_is_logged_in");
+      const userEmail = localStorage.getItem("fraud_user_email");
 
-  // EMPÊCHER COMPLÈTEMENT LE RETOUR
-  const handlePopState = (event: PopStateEvent) => {
-    if (!checkAuth()) {
-      // Empêcher la navigation
-      event.preventDefault();
-      window.history.pushState(null, "", window.location.href);
-    }
-  };
+      if (isLoggedIn !== "true" || !userEmail) {
+        // Nettoyer complètement
+        localStorage.removeItem("fraud_is_logged_in");
+        localStorage.removeItem("fraud_user_email");
+        localStorage.removeItem("fraud_user_name");
 
-  // Bloquer l'historique
-  window.history.pushState(null, "", window.location.href);
-  
-  window.addEventListener('popstate', handlePopState);
+        // Rediriger immédiatement sans possibilité de retour
+        window.location.href = "/login";
+        return false;
+      }
+      return true;
+    };
 
-  return () => {
-    isMounted = false;
-    window.removeEventListener('popstate', handlePopState);
-  };
-}, [router]);
+    // Vérifier immédiatement
+    checkAuth();
+
+    // EMPÊCHER COMPLÈTEMENT LE RETOUR
+    const handlePopState = (event: PopStateEvent) => {
+      if (!checkAuth()) {
+        // Empêcher la navigation
+        event.preventDefault();
+        window.history.pushState(null, "", window.location.href);
+      }
+    };
+
+    // Bloquer l'historique
+    window.history.pushState(null, "", window.location.href);
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [router]);
   // Récupérer les infos depuis localStorage
   useEffect(() => {
     const storedName = localStorage.getItem("fraud_user_name");
@@ -184,6 +185,7 @@ useEffect(() => {
     }
   };
 
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 flex">
       {/* Messages Flash */}
@@ -255,9 +257,8 @@ useEffect(() => {
 
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-80 bg-white/95 backdrop-blur-xl border-r border-slate-200/60 transform ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-all duration-500 ease-out lg:relative lg:translate-x-0 lg:flex lg:flex-col lg:h-screen lg:sticky lg:top-0 shadow-2xl shadow-blue-500/5`}
+        className={`fixed inset-y-0 left-0 z-50 w-80 bg-white/95 backdrop-blur-xl border-r border-slate-200/60 transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } transition-all duration-500 ease-out lg:relative lg:translate-x-0 lg:flex lg:flex-col lg:h-screen lg:sticky lg:top-0 shadow-2xl shadow-blue-500/5`}
       >
         {/* Logo */}
         <div className="flex items-center justify-center h-20 border-b border-slate-200/60 px-6">
@@ -336,11 +337,10 @@ useEffect(() => {
                   item.onClick();
                 }
               }}
-              className={`group relative w-full flex items-center justify-between px-4 py-3 rounded-2xl mb-2 transition-all duration-300 ${
-                activeTab === item.id
+              className={`group relative w-full flex items-center justify-between px-4 py-3 rounded-2xl mb-2 transition-all duration-300 ${activeTab === item.id
                   ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg shadow-indigo-500/25"
                   : "text-slate-600 bg-transparent hover:bg-indigo-50 hover:text-indigo-700 hover:shadow-lg hover:shadow-indigo-500/10 hover:border hover:border-indigo-100"
-              }`}
+                }`}
             >
               <div className="flex items-center space-x-3">
                 <span className="text-lg transition-transform duration-300 group-hover:scale-110">
@@ -350,11 +350,10 @@ useEffect(() => {
               </div>
               {item.badge && (
                 <span
-                  className={`px-2 py-1 text-xs rounded-full ${
-                    activeTab === item.id
+                  className={`px-2 py-1 text-xs rounded-full ${activeTab === item.id
                       ? "bg-white/20 text-white"
                       : "bg-indigo-100 text-indigo-600"
-                  }`}
+                    }`}
                 >
                   {item.badge}
                 </span>
@@ -466,8 +465,8 @@ useEffect(() => {
 
               {/* Bouton Déconnexion en haut à droite */}
               <button
-                onClick={handleLogout}
-                className="px-4 py-2 rounded-xl font-semibold text-sm bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/30 border border-red-400/60 transition-all duration-200"
+                onClick={() => setShowLogoutConfirm(true)}
+                className="px-4 py-2 rounded-xl font-semibold text-sm bg-red-500 cursor-pointer text-white hover:bg-red-600 shadow-lg shadow-red-500/30 border border-red-400/60 transition-all duration-200"
               >
                 Déconnexion
               </button>
@@ -609,6 +608,60 @@ useEffect(() => {
         open={isAnalyticsModalOpen}
         onClose={() => setIsAnalyticsModalOpen(false)}
       />
+      {/* Modal de confirmation de déconnexion */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full border border-slate-200/60 shadow-2xl">
+            <div className="text-center">
+              {/* Icône d'alerte */}
+              <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-8 w-8 text-red-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+              </div>
+
+              {/* Titre et message */}
+              <h3 className="text-xl font-bold text-slate-900 mb-2">
+                Confirmer la déconnexion
+              </h3>
+              <p className="text-slate-600 mb-6">
+                Êtes-vous sûr de vouloir vous déconnecter ?
+                Vous devrez vous reconnecter pour accéder à votre tableau de bord.
+              </p>
+
+              {/* Boutons d'action */}
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setShowLogoutConfirm(false)}
+                  className="flex-1 px-4 py-3 cursor-pointer rounded-xl font-semibold text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all duration-200 border border-slate-200"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setShowLogoutConfirm(false);
+                  }}
+                  className="flex-1 px-4 py-3 rounded-xl cursor-pointer font-semibold text-sm bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/30 border border-red-400/60 transition-all duration-200"
+                >
+                  Se déconnecter
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

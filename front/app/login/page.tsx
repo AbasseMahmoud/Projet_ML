@@ -1,5 +1,4 @@
 "use client";
-
 import Link from "next/link";
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -16,6 +15,9 @@ const LoginPage = () => {
   const [isError, setIsError] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // ✅ URL de votre backend Render (remplacez par la vraie URL)
+  const API_URL = "https://projet-ml-uxvm.onrender.com";
+
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -31,7 +33,7 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const res = await fetch("http://127.0.0.1:5000/api/login", {
+      const res = await fetch(`${API_URL}/api/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -44,12 +46,10 @@ const LoginPage = () => {
 
       const data = await res.json();
 
-      if (res.ok) {
-        // ✅ On marque l'utilisateur comme connecté
+      if (res.ok && data.message === "Connexion réussie") {
         localStorage.setItem("fraud_is_logged_in", "true");
         localStorage.setItem("fraud_user_email", formData.email);
 
-        // 🔁 Redirection vers le dashboard
         router.push("/dashboard");
         return;
       } else {

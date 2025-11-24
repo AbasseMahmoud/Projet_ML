@@ -31,61 +31,128 @@ const Page = () => {
   };
 
   // Soumission du formulaire → appel API Flask
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setMessage(null);
-    setMessageType(null);
+  // const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   setMessage(null);
+  //   setMessageType(null);
 
-    if (formData.password !== formData.confirmPassword) {
-      setMessageType("error");
-      setMessage("Les mots de passe ne correspondent pas.");
-      return;
-    }
+  //   if (formData.password !== formData.confirmPassword) {
+  //     setMessageType("error");
+  //     setMessage("Les mots de passe ne correspondent pas.");
+  //     return;
+  //   }
 
-    if (!formData.acceptTerms) {
-      setMessageType("error");
-      setMessage("Vous devez accepter les conditions d'utilisation.");
-      return;
-    }
+  //   if (!formData.acceptTerms) {
+  //     setMessageType("error");
+  //     setMessage("Vous devez accepter les conditions d'utilisation.");
+  //     return;
+  //   }
 
-    setLoading(true);
-    try {
-      const res = await fetch("http://127.0.0.1:5000/api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: formData.email,
-          password: formData.password,
-        }),
-      });
+  //   setLoading(true);
+  //   try {
+  //     const res = await fetch("http://127.0.0.1:5000/api/register", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         username: formData.email,
+  //         password: formData.password,
+  //       }),
+  //     });
 
-      const data = await res.json();
+  //     const data = await res.json();
 
-      if (res.ok) {
-        // ✅ On garde le vrai nom + email en local pour le dashboard
-        const fullName = `${formData.firstName} ${formData.lastName}`.trim();
-        localStorage.setItem("fraud_user_name", fullName);
-        localStorage.setItem("fraud_user_email", formData.email);
+  //     if (res.ok) {
+  //       // ✅ On garde le vrai nom + email en local pour le dashboard
+  //       const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+  //       localStorage.setItem("fraud_user_name", fullName);
+  //       localStorage.setItem("fraud_user_email", formData.email);
 
-        setMessageType("success");
-        setMessage(data.message || "Inscription réussie !");
+  //       setMessageType("success");
+  //       setMessage(data.message || "Inscription réussie !");
 
-        // 🔁 Redirection vers la page de connexion
+  //       // 🔁 Redirection vers la page de connexion
+  //       router.push("/login");
+  //     } else {
+  //       setMessageType("error");
+  //       setMessage(data.message || "Erreur lors de l'inscription.");
+  //     }
+  //   } catch (err) {
+  //     console.error(err);
+  //     setMessageType("error");
+  //     setMessage("Erreur de connexion au serveur.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // Soumission du formulaire → appel API Flask
+const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  setMessage(null);
+  setMessageType(null);
+
+  if (formData.password !== formData.confirmPassword) {
+    setMessageType("error");
+    setMessage("Les mots de passe ne correspondent pas.");
+    return;
+  }
+
+  if (!formData.acceptTerms) {
+    setMessageType("error");
+    setMessage("Vous devez accepter les conditions d'utilisation.");
+    return;
+  }
+
+  setLoading(true);
+  try {
+    // ✅ CORRIGEZ L'URL : utilisez votre backend Render
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://projet-ml-uxvm.onrender.com';
+    
+    const res = await fetch(`${API_URL}/api/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: formData.email,        // ✅ Envoyer email au lieu de username
+        password: formData.password,
+        firstName: formData.firstName, // ✅ Ajouter firstName
+        lastName: formData.lastName,   // ✅ Ajouter lastName
+        confirmPassword: formData.confirmPassword, // ✅ Ajouter confirmPassword
+        acceptTerms: formData.acceptTerms          // ✅ Ajouter acceptTerms
+      }),
+    });
+
+    const data = await res.json();
+
+    // ✅ Vérifiez data.success au lieu de res.ok
+    if (data.success) {
+      // ✅ On garde le vrai nom + email en local pour le dashboard
+      const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+      localStorage.setItem("fraud_user_name", fullName);
+      localStorage.setItem("fraud_user_email", formData.email);
+
+      setMessageType("success");
+      setMessage(data.message || "Inscription réussie !");
+
+      // 🔁 Redirection vers la page de connexion
+      setTimeout(() => {
         router.push("/login");
-      } else {
-        setMessageType("error");
-        setMessage(data.message || "Erreur lors de l'inscription.");
-      }
-    } catch (err) {
-      console.error(err);
+      }, 1500);
+    } else {
       setMessageType("error");
-      setMessage("Erreur de connexion au serveur.");
-    } finally {
-      setLoading(false);
+      setMessage(data.error || "Erreur lors de l'inscription."); // ✅ Utiliser data.error
     }
-  };
+  } catch (err) {
+    console.error(err);
+    setMessageType("error");
+    setMessage("Erreur de connexion au serveur.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">

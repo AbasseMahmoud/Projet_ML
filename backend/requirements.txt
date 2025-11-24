@@ -1,7 +1,7 @@
 # Outils de build ESSENTIELS - Installer en premier
 setuptools>=70.0.0  
-wheel>=0.43.0       
-build>=1.0.0       
+wheel>=0.43.0      
+build>=1.0.0        
 
 # Flask & Web
 Flask>=3.0.0
@@ -10,7 +10,13 @@ Flask-Migrate>=4.0.5
 Flask-SQLAlchemy>=3.1.1
 gunicorn>=21.2.0
 
-# Data Science 
+# Data Science - versions COMPATIBLES pour Python 3.12 (dernières versions avec wheels)
+pandas>=2.2.0
+scikit-learn>=1.5.0
+numpy>=1.26.0
+scipy>=1.14.0
+seaborn>=0.13.0
+matplotlib>=3.9.0
 imbalanced-learn>=0.12.0
 joblib>=1.4.0
 threadpoolctl>=3.5.0

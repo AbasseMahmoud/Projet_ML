@@ -337,7 +337,7 @@ const Dashboard = () => {
                   item.onClick();
                 }
               }}
-              className={`group relative w-full flex items-center justify-between px-4 py-3 rounded-2xl mb-2 transition-all duration-300 ${activeTab === item.id
+              className={`group relative w-full flex items-center  cursor-pointer justify-between px-4 py-3 rounded-2xl mb-2 transition-all duration-300 ${activeTab === item.id
                   ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg shadow-indigo-500/25"
                   : "text-slate-600 bg-transparent hover:bg-indigo-50 hover:text-indigo-700 hover:shadow-lg hover:shadow-indigo-500/10 hover:border hover:border-indigo-100"
                 }`}
@@ -373,7 +373,7 @@ const Dashboard = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-slate-900 truncate">
-                  {userName || "Utilisateur connecté"}
+                  {userEmail || "Utilisateur connecté"}
                 </p>
                 <p className="text-sm text-slate-500 truncate">
                   {userEmail || "email non disponible"}
@@ -392,7 +392,7 @@ const Dashboard = () => {
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="lg:hidden p-2 rounded-xl bg-white shadow-lg shadow-slate-500/10 border border-slate-200/60 text-slate-600 hover:text-indigo-600 transition-colors duration-200"
+                className="lg:hidden p-2 rounded-xl bg-white shadow-lg cursor-pointer shadow-slate-500/10 border border-slate-200/60 text-slate-600 hover:text-indigo-600 transition-colors duration-200"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -445,7 +445,7 @@ const Dashboard = () => {
               </div>
 
               {/* Notifications */}
-              <button className="relative p-3 rounded-xl bg-white shadow-lg shadow-slate-500/10 border border-slate-200/60 text-slate-600 hover:text-indigo-600 transition-all duration-200 hover:shadow-indigo-500/25">
+              <button className="relative p-3 rounded-xl bg-white shadow-lg  cursor-pointer shadow-slate-500/10 border border-slate-200/60 text-slate-600 hover:text-indigo-600 transition-all duration-200 hover:shadow-indigo-500/25">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6"
@@ -511,7 +511,7 @@ const Dashboard = () => {
               ].map((action, index) => (
                 <button
                   key={index}
-                  className="group p-6 bg-slate-50 hover:bg-gradient-to-br hover:from-indigo-50 hover:to-purple-50 rounded-2xl border border-slate-200/60 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-300 text-left"
+                  className="group p-6 bg-slate-50 hover:bg-gradient-to-br  cursor-pointer hover:from-indigo-50 hover:to-purple-50 rounded-2xl border border-slate-200/60 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-300 text-left"
                   onClick={() => {
                     if (action.title === "Entraîner Modèle") {
                       setIsModelsModalOpen(true);
